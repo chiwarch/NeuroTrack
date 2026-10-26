@@ -29,3 +29,4 @@ Thumbs.db
 .config.json
 storrage/logs/
 storage/framework/cache/data/
+.claude/
