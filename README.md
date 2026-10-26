@@ -1,3 +1,7 @@
+## 📄 License
+This project is open for viewing and educational purposes, but **commercial use, redistribution, or selling** of this source code is strictly prohibited without explicit permission. See the [LICENSE](LICENSE) file for details.
+
+
 # NeuroTrack — Laravel (Tahap 1: Kuis · Tahap 2: Absensi QR)
 
 Platform sekolah SMK: katalog kuis per mapel (umum + kejuruan), dashboard siswa, guru, dan admin.

@@ -30,3 +30,5 @@ Thumbs.db
 storrage/logs/
 storage/framework/cache/data/
 .claude/
+CLAUDE.md
+AGENTS.md
