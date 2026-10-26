@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+/* Gaya landing page (CSS khusus), dimasukkan ke layer components agar tidak menimpa utilitas Tailwind */
+@import './landing.css' layer(components);
+
+@source '../views';
+@source '../js';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-brand-50: #f4f0ff;
+    --color-brand-100: #e8e0ff;
+    --color-brand-200: #d5c7ff;
+    --color-brand-500: #6d3df0;
+    --color-brand-600: #5b2fd6;
+    --color-brand-700: #4a25b3;
+    --color-ink: #1b1550;
+    --color-mute: #5b5a7a;
+}
+
+@layer components {
+    .t-btn { @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50; }
+    .t-btn-primary { @apply bg-brand-500 text-white shadow-md shadow-brand-500/25 hover:bg-brand-600; }
+    .t-btn-soft { @apply bg-brand-50 text-brand-600 hover:bg-brand-100; }
+    .t-btn-line { @apply border border-slate-200 bg-white text-ink hover:bg-slate-50; }
+    .t-btn-danger { @apply bg-rose-50 text-rose-600 hover:bg-rose-100; }
+    .t-btn-sm { @apply px-3 py-1.5 text-xs; }
+
+    .t-card { @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100; }
+    .t-input { @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100; }
+    .t-label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+    .t-error { @apply mt-1 text-xs text-rose-600; }
+    .t-hint { @apply mt-1 text-xs text-mute; }
+    .t-th { @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500; }
+    .t-td { @apply px-4 py-3 text-sm align-middle; }
+    .t-badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold; }
+    .t-page-title { @apply text-2xl font-extrabold tracking-tight text-ink; }
+}
