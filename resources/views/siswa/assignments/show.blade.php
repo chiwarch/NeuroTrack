@@ -24,7 +24,7 @@
     <div class="t-card max-w-2xl">
         <h2 class="mb-1 text-lg font-extrabold">{{ $submission ? 'Pengumpulanmu' : 'Kumpulkan tugas' }}</h2>
         @if ($submission)
-            <p class="text-sm text-mute">Dikumpulkan {{ $submission->submitted_at?->translatedFormat('d M Y, H:i') ?? 'Waktu tidak tersedia' }}
+            <p class="text-sm text-mute">Dikumpulkan {{ $submission->submitted_at->translatedFormat('d M Y, H:i') }}
                 @if ($submission->isLate()) <span class="t-badge bg-amber-100 text-amber-700">Terlambat</span> @endif</p>
             @if ($submission->file_path)<a href="{{ route('siswa.assignments.file', $assignment) }}" class="mt-2 inline-block text-sm font-semibold text-brand-600 hover:underline">{{ $submission->file_name }}</a>@endif
             @if ($submission->answer_text)<p class="mt-2 whitespace-pre-line rounded-xl bg-slate-50 p-3 text-sm">{{ $submission->answer_text }}</p>@endif

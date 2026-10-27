@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Ortu;
+use App\Http\Controllers\AnnouncementManageController;
+use App\Http\Controllers\AwardController;
+use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Guru;
@@ -30,6 +34,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/kuis/{quiz}/mulai', [Siswa\QuizController::class, 'start'])->name('quizzes.start');
         Route::get('/riwayat', [Siswa\QuizController::class, 'history'])->name('history');
         Route::get('/statistik', Siswa\StatsController::class)->name('stats');
+        Route::get('/pengumuman', [Siswa\AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/prestasi', [Siswa\AchievementController::class, 'index'])->name('achievements');
+        Route::get('/peringkat', LeaderboardController::class)->name('leaderboard');
 
         Route::get('/tugas', [Siswa\AssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/tugas/{assignment}', [Siswa\AssignmentController::class, 'show'])->name('assignments.show');
@@ -44,6 +51,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/percobaan/{attempt}/hasil', [Siswa\AttemptController::class, 'result'])->name('attempts.result');
     });
 
+    // Orang tua
+    Route::middleware(EnsureRole::class.':orang_tua')->prefix('orang-tua')->name('orang_tua.')->group(function () {
+        Route::get('/', Ortu\DashboardController::class)->name('dashboard');
+        Route::get('/anak/{student}', [Ortu\ChildController::class, 'show'])->name('children.show');
+        Route::get('/pengumuman', [Ortu\AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('/peringkat', LeaderboardController::class)->name('leaderboard');
+    });
+
     // Guru
     Route::middleware(EnsureRole::class.':guru')->prefix('guru')->name('guru.')->group(function () {
         Route::get('/', Guru\DashboardController::class)->name('dashboard');
@@ -54,6 +69,13 @@ Route::middleware('auth')->group(function () {
         Route::get('kuis/{quiz}/soal/{question}/ubah', [Guru\QuestionController::class, 'edit'])->name('questions.edit');
         Route::put('kuis/{quiz}/soal/{question}', [Guru\QuestionController::class, 'update'])->name('questions.update');
         Route::delete('kuis/{quiz}/soal/{question}', [Guru\QuestionController::class, 'destroy'])->name('questions.destroy');
+
+        Route::resource('pengumuman', AnnouncementManageController::class)->parameters(['pengumuman' => 'announcement'])->except('show')->names('announcements');
+
+        Route::get('penghargaan', [AwardController::class, 'index'])->name('awards.index');
+        Route::post('penghargaan', [AwardController::class, 'store'])->name('awards.store');
+        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->name('awards.destroy');
+        Route::get('peringkat', LeaderboardController::class)->name('leaderboard');
 
         Route::get('tugas/berkas/{submission}', [Guru\AssignmentController::class, 'file'])->name('assignments.file');
         Route::resource('tugas', Guru\AssignmentController::class)->parameters(['tugas' => 'assignment'])->names('assignments');
@@ -77,6 +99,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', Admin\DashboardController::class)->name('dashboard');
         Route::resource('jurusan', Admin\MajorController::class)->parameters(['jurusan' => 'major'])->except('show')->names('majors');
         Route::resource('mapel', Admin\SubjectController::class)->parameters(['mapel' => 'subject'])->except('show')->names('subjects');
+        Route::resource('pengumuman', AnnouncementManageController::class)->parameters(['pengumuman' => 'announcement'])->except('show')->names('announcements');
+        Route::get('penghargaan', [AwardController::class, 'index'])->name('awards.index');
+        Route::post('penghargaan', [AwardController::class, 'store'])->name('awards.store');
+        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->name('awards.destroy');
+        Route::get('peringkat', LeaderboardController::class)->name('leaderboard');
+        Route::resource('lencana', Admin\BadgeController::class)->parameters(['lencana' => 'badge'])->except('show')->names('badges');
         Route::resource('kelas', Admin\ClassController::class)->parameters(['kelas' => 'class'])->except('show')->names('classes');
         Route::resource('pengguna', Admin\UserController::class)->parameters(['pengguna' => 'user'])->except('show')->names('users');
     });

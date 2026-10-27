@@ -12,7 +12,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    public const ROLES = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Siswa'];
+    public const ROLES = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Siswa', 'orang_tua' => 'Orang Tua'];
 
     protected $fillable = ['name', 'email', 'password', 'role', 'nis', 'major_id', 'grade_level'];
 
@@ -26,6 +26,7 @@ class User extends Authenticatable
     public function isAdmin(): bool { return $this->role === 'admin'; }
     public function isGuru(): bool { return $this->role === 'guru'; }
     public function isSiswa(): bool { return $this->role === 'siswa'; }
+    public function isOrangTua(): bool { return $this->role === 'orang_tua'; }
 
     public function major(): BelongsTo
     {
@@ -46,6 +47,18 @@ class User extends Authenticatable
     public function attempts(): HasMany
     {
         return $this->hasMany(Attempt::class);
+    }
+
+    /** Anak yang terhubung (khusus orang tua), via parent_student. */
+    public function children(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'parent_student', 'parent_id', 'student_id')->withPivot('relationship');
+    }
+
+    /** Orang tua yang terhubung (khusus siswa). */
+    public function parents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'parent_student', 'student_id', 'parent_id')->withPivot('relationship');
     }
 
     /** Kelas aktif siswa (via class_memberships). */

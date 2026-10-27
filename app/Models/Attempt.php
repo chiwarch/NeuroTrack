@@ -16,6 +16,15 @@ class Attempt extends Model
         return ['started_at' => 'datetime', 'finished_at' => 'datetime', 'score' => 'float'];
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function (Attempt $a) {
+            if ($a->status === 'selesai') {
+                rescue(fn () => \App\Services\Gamification::syncQuiz($a));
+            }
+        });
+    }
+
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);

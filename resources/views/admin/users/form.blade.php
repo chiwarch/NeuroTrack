@@ -70,6 +70,39 @@
             </div>
         </fieldset>
 
+        <fieldset class="rounded-2xl bg-slate-50 p-4">
+            <legend class="px-1 text-xs font-bold uppercase tracking-wide text-mute">Khusus orang tua</legend>
+            @php $picked = collect(old('children', $linked))->map(fn ($v) => (int) $v)->all(); @endphp
+            <div class="grid gap-5 sm:grid-cols-3">
+                <div>
+                    <label for="relationship" class="t-label">Hubungan</label>
+                    <select id="relationship" name="relationship" class="t-input">
+                        <option value="">—</option>
+                        @foreach (['Ayah', 'Ibu', 'Wali'] as $r)
+                            <option value="{{ $r }}" @selected(old('relationship', $relationship) === $r)>{{ $r }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="sm:col-span-2">
+                    <label for="child-filter" class="t-label">Anak (siswa)</label>
+                    <input id="child-filter" type="search" placeholder="Cari nama atau NIS" class="t-input mb-2"
+                           oninput="const q=this.value.toLowerCase();document.querySelectorAll('[data-child]').forEach(l=>l.hidden=!l.dataset.child.includes(q))">
+                    <div class="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                        @forelse ($students as $s)
+                            <label data-child="{{ strtolower($s->name.' '.$s->nis) }}" class="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-sm hover:bg-slate-50">
+                                <input type="checkbox" name="children[]" value="{{ $s->id }}" @checked(in_array($s->id, $picked, true)) class="size-4 accent-brand-500">
+                                <span class="font-semibold">{{ $s->name }}</span>
+                                <span class="text-xs text-mute">{{ $s->nis }} · {{ $s->classes->first()?->name }}</span>
+                            </label>
+                        @empty
+                            <p class="p-2 text-sm text-mute">Belum ada akun siswa.</p>
+                        @endforelse
+                    </div>
+                    @error('children') <p class="t-error">{{ $message }}</p> @enderror
+                </div>
+            </div>
+        </fieldset>
+
         <button type="submit" class="t-btn t-btn-primary">Simpan</button>
     </form>
 @endsection

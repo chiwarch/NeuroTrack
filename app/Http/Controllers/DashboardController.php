@@ -9,6 +9,7 @@ class DashboardController extends Controller
         return redirect()->route(match (auth()->user()->role) {
             'admin' => 'admin.dashboard',
             'guru' => 'guru.dashboard',
+            'orang_tua' => 'orang_tua.dashboard',
             default => 'siswa.dashboard',
         });
     }

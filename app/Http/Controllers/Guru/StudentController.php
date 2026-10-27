@@ -8,14 +8,12 @@ use App\Models\Skill;
 use App\Models\SkillAssessment;
 use App\Models\User;
 use App\Services\SkillStats;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
     /** Siswa aktif di kelas-kelas yang mapelnya diampu guru ini (class_subjects). */
-    private function students(): Builder
+    private function students()
     {
         $classIds = ClassSubject::where('teacher_id', auth()->id())->pluck('class_id')->unique()->all();
 
@@ -57,44 +55,23 @@ class StudentController extends Controller
         abort_unless($this->students()->whereKey($student->id)->exists(), 403);
 
         $skills = Skill::softSkills();
-        $skillIds = $skills->modelKeys();
-        $allowedScoreKeys = $skillIds ? ':'.implode(',', $skillIds) : '';
-        $rules = [
-            'scores' => ['required', 'array'.$allowedScoreKeys],
-            'notes' => ['nullable', 'string', 'max:1000'],
-        ];
+        $rules = ['scores' => ['required', 'array'], 'notes' => ['nullable', 'string', 'max:1000']];
         foreach ($skills as $skill) {
             $rules["scores.{$skill->id}"] = ['required', 'integer', 'between:1,5'];
         }
         $data = $request->validate($rules, ['scores.*.required' => 'Pilih nilai 1–5 untuk setiap aspek.']);
 
-        DB::transaction(function () use ($data, $skills, $student): void {
-            $now = now();
-            $periodStart = $now->copy()->startOfMonth()->toDateString();
-            $periodEnd = $now->copy()->endOfMonth()->toDateString();
-            $assessmentAttributes = [
-                'student_id' => $student->id,
-                'assessed_by' => auth()->id(),
-                'source_type' => 'teacher',
-                'period_start' => $periodStart,
-                'period_end' => $periodEnd,
-            ];
-            $assessment = SkillAssessment::query()
-                ->where('student_id', $student->id)
-                ->where('assessed_by', auth()->id())
-                ->where('source_type', 'teacher')
-                ->whereDate('period_start', $periodStart)
-                ->whereDate('period_end', $periodEnd)
-                ->first() ?? new SkillAssessment($assessmentAttributes);
-            $assessment->fill(['assessed_at' => $now, 'notes' => $data['notes'] ?? null])->save();
+        $assessment = SkillAssessment::updateOrCreate(
+            [
+                'student_id' => $student->id, 'assessed_by' => auth()->id(), 'source_type' => 'teacher',
+                'period_start' => now()->startOfMonth()->toDateString(), 'period_end' => now()->endOfMonth()->toDateString(),
+            ],
+            ['assessed_at' => now(), 'notes' => $data['notes'] ?? null],
+        );
 
-            foreach ($skills as $skill) {
-                $assessment->scores()->updateOrCreate(
-                    ['skill_id' => $skill->id],
-                    ['score' => $data['scores'][$skill->id]],
-                );
-            }
-        });
+        foreach ($skills as $skill) {
+            $assessment->scores()->updateOrCreate(['skill_id' => $skill->id], ['score' => $data['scores'][$skill->id]]);
+        }
 
         return back()->with('success', 'Penilaian soft skill disimpan.');
     }

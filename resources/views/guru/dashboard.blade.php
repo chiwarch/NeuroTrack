@@ -58,4 +58,5 @@
             </div>
         </section>
     </div>
+    @include('announcements._latest')
 @endsection

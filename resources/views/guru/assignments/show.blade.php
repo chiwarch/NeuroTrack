@@ -32,7 +32,7 @@
                             <td class="t-td"><p class="font-bold">{{ $st->name }}</p><p class="text-xs text-mute">{{ $st->nis }}</p></td>
                             @if ($sub)
                                 <td class="t-td">
-                                    <p class="text-xs text-mute">{{ $sub->submitted_at?->translatedFormat('d M, H:i') ?? 'Waktu pengumpulan tidak tersedia' }}
+                                    <p class="text-xs text-mute">{{ $sub->submitted_at->translatedFormat('d M, H:i') }}
                                         @if ($sub->isLate()) <span class="t-badge bg-amber-100 text-amber-700">Terlambat</span> @endif</p>
                                     @if ($sub->file_path)<a href="{{ route('guru.assignments.file', $sub) }}" class="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline">{{ $sub->file_name }}</a>@endif
                                     @if ($sub->answer_text)<details class="mt-1 text-sm"><summary class="cursor-pointer font-semibold text-mute">Lihat jawaban teks</summary><p class="mt-1 whitespace-pre-line">{{ $sub->answer_text }}</p></details>@endif

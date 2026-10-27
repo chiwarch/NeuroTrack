@@ -7,7 +7,6 @@ use App\Models\Assignment;
 use App\Models\ClassSubject;
 use App\Models\Submission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -103,7 +102,7 @@ class AssignmentController extends Controller
         return view('guru.assignments.show', [
             'assignment' => $assignment,
             'students' => $assignment->classSubject->schoolClass->students()->orderBy('name')->get(),
-            'submissions' => $assignment->submissions()->with('assignment')->get()->keyBy('student_id'),
+            'submissions' => $assignment->submissions()->get()->keyBy('student_id'),
         ]);
     }
 
@@ -118,32 +117,21 @@ class AssignmentController extends Controller
             'feedback.*' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        DB::transaction(function () use ($assignment, $data): void {
-            foreach ($assignment->submissions as $submission) {
-                $updates = [];
-
-                if (array_key_exists($submission->id, $data['scores'] ?? [])) {
-                    $score = $data['scores'][$submission->id];
-                    $updates['score'] = $score;
-                    $updates['graded_by'] = $score !== null ? auth()->id() : null;
-                }
-
-                if (array_key_exists($submission->id, $data['feedback'] ?? [])) {
-                    $updates['feedback'] = $data['feedback'][$submission->id];
-                }
-
-                if ($updates !== []) {
-                    $submission->update($updates);
-                }
-            }
-        });
+        foreach ($assignment->submissions as $submission) {
+            $score = $data['scores'][$submission->id] ?? null;
+            $submission->update([
+                'score' => $score,
+                'feedback' => $data['feedback'][$submission->id] ?? null,
+                'graded_by' => $score !== null ? auth()->id() : null,
+            ]);
+        }
 
         return back()->with('success', 'Nilai disimpan.');
     }
 
     public function file(Submission $submission)
     {
-        $this->own($submission->loadMissing('assignment')->assignment);
+        $this->own($submission->assignment);
         abort_unless($submission->file_path && Storage::disk('local')->exists($submission->file_path), 404);
 
         return Storage::disk('local')->download($submission->file_path, $submission->file_name ?? basename($submission->file_path));

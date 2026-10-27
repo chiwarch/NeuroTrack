@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Announcement;
+use App\Models\Badge;
+use App\Models\XpTransaction;
+use App\Services\Gamification;
 use App\Models\Assignment;
 use App\Models\ClassSubject;
 use App\Models\Major;
@@ -21,26 +25,30 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $rpl = Major::create(['name' => 'Rekayasa Perangkat Lunak', 'code' => 'RPL']);
-        $tkj = Major::create(['name' => 'Teknik Komputer dan Jaringan', 'code' => 'TKJ']);
+        $this->call(MajorSeeder::class);
+        $rpl = Major::where('code', 'RPL')->firstOrFail();
 
         $mtk = Subject::create(['name' => 'Matematika', 'type' => 'umum', 'icon' => 'mapel-mtk']);
         $ind = Subject::create(['name' => 'Bahasa Indonesia', 'type' => 'umum', 'icon' => 'mapel-indonesia']);
         $ing = Subject::create(['name' => 'Bahasa Inggris', 'type' => 'umum', 'icon' => 'mapel-english']);
         $seni = Subject::create(['name' => 'Seni dan Budaya', 'type' => 'umum', 'icon' => 'mapel-seni']);
         $pemrograman = Subject::create(['name' => 'Pemrograman Dasar', 'type' => 'kejuruan', 'major_id' => $rpl->id, 'icon' => 'mapel-rpl']);
-        $jaringan = Subject::create(['name' => 'Jaringan Dasar', 'type' => 'kejuruan', 'major_id' => $tkj->id, 'icon' => 'clipboard']);
 
-        User::create(['name' => 'Admin Sekolah', 'email' => 'admin@neurotrack.test', 'password' => 'password', 'role' => 'admin']);
+        $this->call(VocationalSubjectSeeder::class);
+
+        $admin = User::create(['name' => 'Admin Sekolah', 'email' => 'admin@neurotrack.test', 'password' => 'password', 'role' => 'admin']);
 
         $guru = User::create(['name' => 'Bu Rina Wulandari', 'email' => 'guru@neurotrack.test', 'password' => 'password', 'role' => 'guru']);
         $guru->subjects()->sync([$mtk->id, $ing->id, $pemrograman->id]);
 
         $guru2 = User::create(['name' => 'Pak Dimas Prakoso', 'email' => 'guru2@neurotrack.test', 'password' => 'password', 'role' => 'guru']);
-        $guru2->subjects()->sync([$ind->id, $seni->id, $jaringan->id]);
+        $guru2->subjects()->sync([$ind->id, $seni->id]);
 
         $andi = User::create(['name' => 'Andi Saputra', 'email' => 'siswa@neurotrack.test', 'password' => 'password', 'role' => 'siswa', 'nis' => '10001', 'major_id' => $rpl->id, 'grade_level' => 10]);
-        $bella = User::create(['name' => 'Bella Putri', 'email' => 'bella@neurotrack.test', 'password' => 'password', 'role' => 'siswa', 'nis' => '10002', 'major_id' => $tkj->id, 'grade_level' => 10]);
+        $bella = User::create(['name' => 'Bella Putri', 'email' => 'bella@neurotrack.test', 'password' => 'password', 'role' => 'siswa', 'nis' => '10002', 'major_id' => $rpl->id, 'grade_level' => 10]);
+
+        $ortu = User::create(['name' => 'Ibu Sari Saputra', 'email' => 'ortu@neurotrack.test', 'password' => 'password', 'role' => 'orang_tua']);
+        $ortu->children()->attach($andi->id, ['relationship' => 'Ibu']);
 
         $kelas = SchoolClass::create(['name' => 'X RPL 1', 'academic_year' => '2026/2027', 'homeroom_teacher_id' => $guru->id]);
         $kelas->syncStudents([$andi->id, $bella->id]);
@@ -56,6 +64,25 @@ class DatabaseSeeder extends Seeder
             'title' => 'Latihan Soal Persamaan Linear', 'description' => 'Kerjakan 10 soal di buku latihan, foto lalu unggah sebagai PDF atau gambar.',
             'deadline' => now()->addDays(7)->setTime(23, 59), 'max_score' => 100,
         ]);
+
+        foreach ([
+            [$admin, 'Selamat datang di NeuroTrack', "Mulai semester ini kita belajar dan absen lewat NeuroTrack. Masuk dengan akun dari sekolah ya.", 'all', null],
+            [$admin, 'Pertemuan Orang Tua dan Wali Kelas', "Pertemuan orang tua dan wali kelas dilaksanakan Sabtu pekan depan pukul 09.00 di aula sekolah.", 'parents', null],
+            [$guru, 'Ulangan Harian Matematika', "Ulangan harian Persamaan Linear hari Jumat. Kerjakan juga kuis latihannya di menu Kuis.", 'class', $kelas],
+        ] as [$pembuat, $judul, $isi, $sasaran, $untukKelas]) {
+            $pengumuman = new Announcement(['title' => $judul, 'content' => $isi, 'target_type' => $sasaran, 'published_at' => now()]);
+            $pengumuman->created_by = $pembuat->id;
+            $pengumuman->save();
+            if ($untukKelas) {
+                $pengumuman->classes()->attach($untukKelas->id);
+            }
+        }
+
+        $this->call(GamificationSeeder::class);
+        Gamification::grant($andi->id, Badge::where('name', 'Arena Contender')->firstOrFail(), $guru->id, 'Peserta Lomba Cerdas Cermat');
+        XpTransaction::create(['user_id' => $bella->id, 'amount' => 60, 'source' => 'Kuis', 'description' => 'Contoh XP awal', 'reference' => 'seed:contoh']);
+        Gamification::refresh($andi->id);
+        Gamification::refresh($bella->id);
 
         $this->call(SkillSeeder::class);
         $nilai = SkillAssessment::create(['student_id' => $andi->id, 'assessed_by' => $guru->id, 'source_type' => 'teacher',
@@ -84,11 +111,6 @@ class DatabaseSeeder extends Seeder
             ['mc', 'Tari Pendet berasal dari daerah ...', ['Bali', 'Jawa Barat', 'Sumatera Utara', 'Sulawesi'], 0],
             ['mc', 'Alat musik gamelan banyak dimainkan di ...', ['Papua', 'Jawa dan Bali', 'Aceh', 'Kalimantan'], 1],
             ['isian', 'Kain bermotif yang dibuat dengan teknik menutup memakai malam disebut ...', ['batik']],
-        ]);
-        $this->quiz($jaringan, $guru2, 'Dasar Jaringan Komputer', 10, [
-            ['mc', 'Alamat unik perangkat dalam jaringan disebut ...', ['IP Address', 'Password', 'Username', 'Port USB'], 0],
-            ['mc', 'Perangkat penghubung banyak komputer dalam satu LAN adalah ...', ['Switch', 'Printer', 'Monitor', 'Speaker'], 0],
-            ['isian', 'Kepanjangan dari LAN dalam bahasa Inggris adalah Local Area ...', ['network']],
         ]);
         $this->quiz($pemrograman, $guru, 'Dasar Algoritma', 10, [
             ['mc', 'Struktur kontrol untuk mengulang perintah disebut ...', ['Percabangan', 'Perulangan', 'Variabel', 'Fungsi'], 1],
