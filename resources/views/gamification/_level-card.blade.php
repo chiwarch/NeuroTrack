@@ -1,4 +1,5 @@
 {{-- Kartu level & XP. Opsional: $gUser (default pengguna yang masuk). --}}
+@if (\App\Services\Gamification::ready())
 @php $info = \App\Services\Gamification::levelInfo($gUser ?? auth()->user()); @endphp
 @if ($info['level'])
     <div class="t-card flex flex-wrap items-center gap-5">
@@ -14,4 +15,5 @@
             <p class="mt-1 text-xs font-semibold text-mute">Total XP</p>
         </div>
     </div>
+@endif
 @endif

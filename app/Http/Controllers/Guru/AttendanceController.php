@@ -56,17 +56,26 @@ class AttendanceController extends Controller
         ]);
     }
 
-    /** Dipanggil JS tiap beberapa detik: token QR terbaru + status kehadiran terkini. */
+    /**
+     * Dipanggil JS tiap beberapa detik. Selain token sekarang, dikirim juga token jendela berikutnya dan jam server,
+     * supaya layar bisa berganti kode tepat waktu dan bilah hitung mundur selalu mulai penuh, tanpa menunggu jaringan.
+     */
     public function live(AttendanceSession $session)
     {
         $this->authorizeSession($session);
 
-        $token = $session->isOpen() ? AttendanceToken::make($session) : null;
+        $now = microtime(true);
+        $step = AttendanceToken::step();
+        $open = $session->isOpen();
+        $url = fn (int $at) => route('siswa.attendance.scan', ['t' => AttendanceToken::make($session, $at)]);
 
         return response()->json([
-            'open' => $session->isOpen(),
-            'url' => $token ? route('siswa.attendance.scan', ['t' => $token]) : null,
-            'expires_in' => AttendanceToken::secondsLeft(),
+            'open' => $open,
+            'url' => $open ? $url((int) $now) : null,
+            'next_url' => $open ? $url((int) $now + $step) : null,
+            'server_time' => $now,
+            'step' => $step,
+            'expires_in' => round($step - fmod($now, $step), 2),
             'records' => $this->records($session)->map(fn ($a) => [
                 'id' => $a->student_id,
                 'status' => $a->status,

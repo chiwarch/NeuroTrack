@@ -25,7 +25,7 @@
         <div class="grid gap-5 sm:grid-cols-2">
             <div>
                 <label for="password" class="t-label">Kata sandi{{ $user->exists ? ' (kosongkan jika tidak diubah)' : '' }}</label>
-                <input id="password" type="password" name="password" class="t-input" autocomplete="new-password" @required(! $user->exists)>
+                <x-password-input id="password" name="password" autocomplete="new-password" :required="! $user->exists" />
                 @error('password') <p class="t-error">{{ $message }}</p> @enderror
             </div>
             <div>

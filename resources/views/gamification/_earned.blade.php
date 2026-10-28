@@ -1,4 +1,5 @@
 {{-- Lencana yang sudah didapat. Opsional: $gUser. --}}
+@if (\App\Services\Gamification::ready())
 @php $owned = \App\Models\UserBadge::with('badge')->where('user_id', ($gUser ?? auth()->user())->id)->latest('earned_at')->get(); @endphp
 @if ($owned->isEmpty())
     <p class="text-sm text-mute">Belum ada lencana.</p>
@@ -11,4 +12,5 @@
             </div>
         @endforeach
     </div>
+@endif
 @endif

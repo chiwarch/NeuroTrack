@@ -31,7 +31,7 @@
             </div>
             <div>
                 <label for="password" class="t-label">Kata sandi</label>
-                <input id="password" name="password" type="password" required autocomplete="current-password" class="t-input">
+                <x-password-input id="password" name="password" required autocomplete="current-password" />
                 @error('password') <p class="t-error">{{ $message }}</p> @enderror
             </div>
             <label class="flex items-center gap-2 text-sm text-mute"><input type="checkbox" name="remember" class="size-4 rounded border-slate-300"> Ingat saya</label>

@@ -10,6 +10,8 @@ use App\Models\SchoolClass;
 use App\Models\User;
 use App\Models\UserBadge;
 use App\Models\XpTransaction;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * XP, level, dan lencana.
@@ -22,6 +24,41 @@ class Gamification
 {
     public const ATTENDANCE_XP = ['present' => 10, 'late' => 5];
     public const QUIZ_XP_RATE = 0.2;
+
+    private static ?bool $ready = null;
+
+    /** Apakah tabel gamifikasi sudah ada (migrasi sudah dijalankan)? */
+    public static function ready(): bool
+    {
+        if (self::$ready === true) {
+            return true;
+        }
+        $ok = Schema::hasTable('levels') && Schema::hasTable('badges') && Schema::hasTable('xp_transactions')
+            && Schema::hasTable('user_badges') && Schema::hasColumn('users', 'current_level_id');
+        if ($ok) {
+            self::$ready = true;
+        }
+
+        return $ok;
+    }
+
+    /**
+     * Jalankan hitungan XP setelah transaksi database selesai, tanpa pernah menggagalkan absensi/kuis.
+     * Bila gagal, galatnya dicatat lengkap di storage/logs/laravel.log; perbaiki dengan `php artisan xp:backfill`.
+     */
+    public static function safely(callable $work, string $context): void
+    {
+        if (! self::ready()) {
+            return;
+        }
+        \Illuminate\Support\Facades\DB::afterCommit(function () use ($work, $context) {
+            try {
+                $work();
+            } catch (\Throwable $e) {
+                Log::error('Gamifikasi gagal ('.$context.'): '.$e->getMessage(), ['exception' => $e]);
+            }
+        });
+    }
 
     public static function quizXp(float $score): int
     {

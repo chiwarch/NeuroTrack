@@ -11,6 +11,7 @@ use App\Http\Controllers\Guru;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\Siswa;
+use App\Http\Middleware\EnsureGamificationReady;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Support\Facades\Route;
 
@@ -35,8 +36,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/riwayat', [Siswa\QuizController::class, 'history'])->name('history');
         Route::get('/statistik', Siswa\StatsController::class)->name('stats');
         Route::get('/pengumuman', [Siswa\AnnouncementController::class, 'index'])->name('announcements.index');
-        Route::get('/prestasi', [Siswa\AchievementController::class, 'index'])->name('achievements');
-        Route::get('/peringkat', LeaderboardController::class)->name('leaderboard');
+        Route::get('/prestasi', [Siswa\AchievementController::class, 'index'])->middleware(EnsureGamificationReady::class)->name('achievements');
+        Route::get('/peringkat', LeaderboardController::class)->middleware(EnsureGamificationReady::class)->name('leaderboard');
 
         Route::get('/tugas', [Siswa\AssignmentController::class, 'index'])->name('assignments.index');
         Route::get('/tugas/{assignment}', [Siswa\AssignmentController::class, 'show'])->name('assignments.show');
@@ -56,7 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', Ortu\DashboardController::class)->name('dashboard');
         Route::get('/anak/{student}', [Ortu\ChildController::class, 'show'])->name('children.show');
         Route::get('/pengumuman', [Ortu\AnnouncementController::class, 'index'])->name('announcements.index');
-        Route::get('/peringkat', LeaderboardController::class)->name('leaderboard');
+        Route::get('/peringkat', LeaderboardController::class)->middleware(EnsureGamificationReady::class)->name('leaderboard');
     });
 
     // Guru
@@ -72,10 +73,10 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('pengumuman', AnnouncementManageController::class)->parameters(['pengumuman' => 'announcement'])->except('show')->names('announcements');
 
-        Route::get('penghargaan', [AwardController::class, 'index'])->name('awards.index');
-        Route::post('penghargaan', [AwardController::class, 'store'])->name('awards.store');
-        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->name('awards.destroy');
-        Route::get('peringkat', LeaderboardController::class)->name('leaderboard');
+        Route::get('penghargaan', [AwardController::class, 'index'])->middleware(EnsureGamificationReady::class)->name('awards.index');
+        Route::post('penghargaan', [AwardController::class, 'store'])->middleware(EnsureGamificationReady::class)->name('awards.store');
+        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->middleware(EnsureGamificationReady::class)->name('awards.destroy');
+        Route::get('peringkat', LeaderboardController::class)->middleware(EnsureGamificationReady::class)->name('leaderboard');
 
         Route::get('tugas/berkas/{submission}', [Guru\AssignmentController::class, 'file'])->name('assignments.file');
         Route::resource('tugas', Guru\AssignmentController::class)->parameters(['tugas' => 'assignment'])->names('assignments');
@@ -100,11 +101,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('jurusan', Admin\MajorController::class)->parameters(['jurusan' => 'major'])->except('show')->names('majors');
         Route::resource('mapel', Admin\SubjectController::class)->parameters(['mapel' => 'subject'])->except('show')->names('subjects');
         Route::resource('pengumuman', AnnouncementManageController::class)->parameters(['pengumuman' => 'announcement'])->except('show')->names('announcements');
-        Route::get('penghargaan', [AwardController::class, 'index'])->name('awards.index');
-        Route::post('penghargaan', [AwardController::class, 'store'])->name('awards.store');
-        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->name('awards.destroy');
-        Route::get('peringkat', LeaderboardController::class)->name('leaderboard');
-        Route::resource('lencana', Admin\BadgeController::class)->parameters(['lencana' => 'badge'])->except('show')->names('badges');
+        Route::get('penghargaan', [AwardController::class, 'index'])->middleware(EnsureGamificationReady::class)->name('awards.index');
+        Route::post('penghargaan', [AwardController::class, 'store'])->middleware(EnsureGamificationReady::class)->name('awards.store');
+        Route::delete('penghargaan/{userBadge}', [AwardController::class, 'destroy'])->middleware(EnsureGamificationReady::class)->name('awards.destroy');
+        Route::get('peringkat', LeaderboardController::class)->middleware(EnsureGamificationReady::class)->name('leaderboard');
+        Route::resource('lencana', Admin\BadgeController::class)->parameters(['lencana' => 'badge'])->except('show')->middleware(EnsureGamificationReady::class)->names('badges');
         Route::resource('kelas', Admin\ClassController::class)->parameters(['kelas' => 'class'])->except('show')->names('classes');
         Route::resource('pengguna', Admin\UserController::class)->parameters(['pengguna' => 'user'])->except('show')->names('users');
     });

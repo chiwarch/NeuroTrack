@@ -20,7 +20,7 @@
                 <p class="text-sm text-mute">Pastikan kamu masuk dengan akunmu sendiri.</p>
             @else
                 <h1 class="text-xl font-extrabold">Kode QR kedaluwarsa</h1>
-                <p class="text-sm text-mute">Kode berganti tiap 20 detik. Pindai lagi QR yang tampil di layar kelas.</p>
+                <p class="text-sm text-mute">Kode berganti tiap {{ \App\Services\AttendanceToken::step() }} detik, jadi pindai dan langsung buka tautannya. Pindai lagi QR yang tampil di layar kelas.</p>
             @endif
         </div>
     </div>

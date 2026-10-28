@@ -79,8 +79,11 @@ if (qrBox && qrBox.dataset.liveUrl) {
     const bar = document.getElementById('qr-bar');
     const countEl = document.getElementById('count-in');
     const IN = ['present', 'late'];
-    let lastUrl = null;
+    // offset = selisih jam server dan jam perangkat ini; window = nomor jendela waktu token yang dikirim server
+    const state = { offset: 0, step: 7, window: null, url: null, nextUrl: null, shown: null };
     let QR = null;
+
+    if (bar) bar.style.transition = 'none';
 
     document.querySelectorAll('[data-select]').forEach((sel) =>
         sel.addEventListener('change', () => (sel.dataset.dirty = '1'))
@@ -102,30 +105,53 @@ if (qrBox && qrBox.dataset.liveUrl) {
         if (countEl) countEl.textContent = masuk;
     };
 
-    const refresh = async () => {
-        const wait = 4; // status siswa diperbarui tiap 4 detik; QR digambar ulang hanya saat token berganti
+    const drawQr = async (url) => {
+        QR = QR || (await import('qrcode')).default;
+        await QR.toCanvas(canvas, url, { width: 256, margin: 1 });
+    };
+
+    // Dijalankan tiap frame: bilah selalu mulai penuh di awal jendela waktu, QR diganti tepat di batas jendela.
+    const tick = () => {
+        if (canvas && state.url) {
+            const now = Date.now() / 1000 + state.offset;
+            if (bar) bar.style.transform = `scaleX(${1 - (now % state.step) / state.step})`;
+            const w = Math.floor(now / state.step);
+            if (w !== state.shown) {
+                const url = w === state.window ? state.url : w === state.window + 1 ? state.nextUrl : null;
+                if (url) {
+                    state.shown = w;
+                    drawQr(url);
+                }
+            }
+        }
+        requestAnimationFrame(tick);
+    };
+
+    const poll = async () => {
+        const t0 = Date.now();
         try {
             const res = await fetch(qrBox.dataset.liveUrl, { headers: { Accept: 'application/json' } });
             const d = await res.json();
+            const t1 = Date.now();
+            state.offset = d.server_time + (t1 - t0) / 2000 - t1 / 1000; // koreksi separuh waktu tempuh
+            state.step = d.step;
             paint(d.records);
-            if (d.url && canvas) {
-                if (d.url !== lastUrl) {
-                    QR = QR || (await import('qrcode')).default;
-                    await QR.toCanvas(canvas, d.url, { width: 256, margin: 1 });
-                    lastUrl = d.url;
-                    if (bar) {
-                        bar.style.transition = 'none';
-                        bar.style.transform = `scaleX(${d.expires_in / 20})`;
-                        void bar.offsetWidth;
-                        bar.style.transition = `transform ${d.expires_in}s linear`;
-                        bar.style.transform = 'scaleX(0)';
-                    }
+            if (canvas) {
+                if (d.url) {
+                    state.window = Math.floor(d.server_time / d.step);
+                    state.url = d.url;
+                    state.nextUrl = d.next_url;
+                } else if (!d.open) {
+                    location.reload(); // sesi ditutup dari tempat lain
+                    return;
                 }
             }
         } catch (e) {
             /* jaringan putus: coba lagi */
         }
-        setTimeout(refresh, wait * 1000);
+        setTimeout(poll, Math.max(1, Math.min(3, state.step - 1)) * 1000);
     };
-    refresh();
+
+    poll();
+    requestAnimationFrame(tick);
 }

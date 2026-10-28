@@ -20,7 +20,7 @@ class Attempt extends Model
     {
         static::saved(function (Attempt $a) {
             if ($a->status === 'selesai') {
-                rescue(fn () => \App\Services\Gamification::syncQuiz($a));
+                \App\Services\Gamification::safely(fn () => \App\Services\Gamification::syncQuiz($a), 'kuis percobaan #'.$a->id);
             }
         });
     }

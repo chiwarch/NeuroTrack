@@ -16,6 +16,14 @@
             <h2 class="text-lg font-extrabold">Nilai soft skill</h2>
             <p class="text-xs text-mute">Skala 1 (perlu bimbingan) sampai 5 (sangat baik). Disimpan per bulan; menyimpan lagi di bulan ini memperbarui nilaimu. Nilai akhir siswa = rata-rata semua guru.</p>
         </div>
+        <style>
+            /* CSS biasa (bukan utilitas Tailwind) agar tetap jalan walau aset belum di-build ulang */
+            .score-pill{position:relative;display:grid;place-items:center;width:2.75rem;height:2.75rem;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff;font-size:.875rem;font-weight:800;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+            .score-pill:hover{background:#f8fafc}
+            .score-pill input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+            .score-pill:has(input:checked){background:var(--color-brand-500,#6d3df0);border-color:var(--color-brand-500,#6d3df0);color:#fff}
+            .score-pill:has(input:focus-visible){outline:3px solid #c9b8ff;outline-offset:2px}
+        </style>
         @error('scores.*') <p class="t-error">{{ $message }}</p> @enderror
         @foreach ($skills as $skill)
             <fieldset>
@@ -23,9 +31,9 @@
                 @if ($skill->description)<p class="text-xs text-mute">{{ $skill->description }}</p>@endif
                 <div class="mt-2 flex gap-2">
                     @foreach (range(1, 5) as $n)
-                        <label class="cursor-pointer">
-                            <input type="radio" name="scores[{{ $skill->id }}]" value="{{ $n }}" class="peer sr-only" @checked((int) old("scores.{$skill->id}", $mine[$skill->id] ?? 0) === $n)>
-                            <span class="grid size-11 place-items-center rounded-xl border border-slate-200 text-sm font-extrabold transition peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-brand-200 hover:bg-slate-50">{{ $n }}</span>
+                        <label class="score-pill">
+                            <input type="radio" name="scores[{{ $skill->id }}]" value="{{ $n }}" @checked((int) old("scores.{$skill->id}", $mine[$skill->id] ?? 0) === $n)>
+                            <span>{{ $n }}</span>
                         </label>
                     @endforeach
                 </div>

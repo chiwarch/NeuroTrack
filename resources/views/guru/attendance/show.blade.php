@@ -22,7 +22,7 @@
                 <p class="font-extrabold">Pindai untuk absen</p>
                 <canvas id="qr-canvas" class="size-64 max-w-full rounded-xl" aria-label="Kode QR absensi"></canvas>
                 <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100"><div id="qr-bar" class="h-full w-full origin-left bg-brand-500"></div></div>
-                <p class="text-xs text-mute">Kode berganti otomatis tiap 20 detik. Jangan difoto atau dibagikan.</p>
+                <p class="text-xs text-mute">Kode berganti otomatis tiap {{ \App\Services\AttendanceToken::step() }} detik. Jangan difoto atau dibagikan.</p>
             </div>
         @else
             <div class="t-card text-sm text-mute lg:self-start" id="qr-box" data-live-url="{{ route('guru.attendance.live', $session) }}">

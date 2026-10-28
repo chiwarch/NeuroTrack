@@ -16,6 +16,12 @@ class BackfillXp extends Command
 
     public function handle(): int
     {
+        if (! Gamification::ready()) {
+            $this->error('Tabel gamifikasi belum ada. Jalankan dulu: php artisan migrate');
+
+            return self::FAILURE;
+        }
+
         $n = 0;
         Attendance::whereIn('status', array_keys(Gamification::ATTENDANCE_XP))->orderBy('id')->each(function ($a) use (&$n) {
             Gamification::syncAttendance($a);

@@ -5,17 +5,21 @@ namespace App\Services;
 use App\Models\AttendanceSession;
 
 /**
- * Token QR yang berganti tiap STEP detik (stateless, ditandatangani HMAC dengan APP_KEY).
- * Token dianggap sah pada jendela waktu saat ini dan satu jendela sebelumnya (±20–40 detik),
+ * Token QR yang berganti tiap step() detik (bawaan 7, config/attendance.php; stateless, ditandatangani HMAC dengan APP_KEY).
+ * Token dianggap sah pada jendela waktu saat ini dan satu jendela sebelumnya (step–2×step detik),
  * jadi tautan/foto QR yang dikirim ke teman cepat kedaluwarsa.
  */
 class AttendanceToken
 {
-    public const STEP = 20;
+    /** Lama satu kode QR (detik). */
+    public static function step(): int
+    {
+        return max(3, (int) config('attendance.qr_step', 7));
+    }
 
     public static function make(AttendanceSession $session, ?int $now = null): string
     {
-        $window = intdiv($now ?? time(), self::STEP);
+        $window = intdiv($now ?? time(), self::step());
 
         return $session->id.'.'.$window.'.'.self::sign($session->id, $window);
     }
@@ -23,7 +27,7 @@ class AttendanceToken
     /** Detik tersisa sebelum token berganti. */
     public static function secondsLeft(?int $now = null): int
     {
-        return self::STEP - (($now ?? time()) % self::STEP);
+        return self::step() - (($now ?? time()) % self::step());
     }
 
     /** @return int|null id sesi jika token sah, null jika tidak */
@@ -39,7 +43,7 @@ class AttendanceToken
             return null;
         }
 
-        $current = intdiv($now ?? time(), self::STEP);
+        $current = intdiv($now ?? time(), self::step());
 
         return ($window === $current || $window === $current - 1) ? $id : null;
     }
