@@ -6,14 +6,20 @@ use App\Http\Controllers\AnnouncementManageController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Guru;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\Siswa;
 use App\Http\Middleware\EnsureGamificationReady;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(SecurityHeaders::class)->group(function () {
 
 // ---- Publik ----
 Route::get('/', HomeController::class)->name('home');
@@ -24,8 +30,10 @@ Route::post('/masuk', [AuthController::class, 'login'])->middleware('throttle:10
 Route::post('/keluar', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 // ---- Wajib login ----
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', AuthenticateSession::class, EnsurePasswordChanged::class])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profil/kata-sandi', [ProfileController::class, 'updatePassword'])->middleware('throttle:10,1')->name('profile.password');
 
     // Siswa
     Route::middleware(EnsureRole::class.':siswa')->prefix('siswa')->name('siswa.')->group(function () {
@@ -107,6 +115,10 @@ Route::middleware('auth')->group(function () {
         Route::get('peringkat', LeaderboardController::class)->middleware(EnsureGamificationReady::class)->name('leaderboard');
         Route::resource('lencana', Admin\BadgeController::class)->parameters(['lencana' => 'badge'])->except('show')->middleware(EnsureGamificationReady::class)->names('badges');
         Route::resource('kelas', Admin\ClassController::class)->parameters(['kelas' => 'class'])->except('show')->names('classes');
+        Route::post('pengguna/{user}/reset-sandi', [Admin\UserController::class, 'resetPassword'])->middleware('throttle:20,1')->name('users.reset-password');
+        Route::get('log-aktivitas', [Admin\AuditLogController::class, 'index'])->name('audit.index');
         Route::resource('pengguna', Admin\UserController::class)->parameters(['pengguna' => 'user'])->except('show')->names('users');
     });
 });
+
+}); // SecurityHeaders

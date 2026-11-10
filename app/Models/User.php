@@ -20,7 +20,7 @@ class User extends Authenticatable
 
     protected function casts(): array
     {
-        return ['password' => 'hashed', 'email_verified_at' => 'datetime'];
+        return ['password' => 'hashed', 'email_verified_at' => 'datetime', 'must_change_password' => 'boolean', 'password_changed_at' => 'datetime'];
     }
 
     public function isAdmin(): bool { return $this->role === 'admin'; }

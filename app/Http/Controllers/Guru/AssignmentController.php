@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\ClassSubject;
 use App\Models\Submission;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -125,6 +126,8 @@ class AssignmentController extends Controller
                 'graded_by' => $score !== null ? auth()->id() : null,
             ]);
         }
+
+        Audit::record('assignment.graded', 'Menilai tugas "'.$assignment->title.'"');
 
         return back()->with('success', 'Nilai disimpan.');
     }

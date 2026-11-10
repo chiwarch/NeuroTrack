@@ -8,6 +8,7 @@ use App\Models\Skill;
 use App\Models\SkillAssessment;
 use App\Models\User;
 use App\Services\SkillStats;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -72,6 +73,8 @@ class StudentController extends Controller
         foreach ($skills as $skill) {
             $assessment->scores()->updateOrCreate(['skill_id' => $skill->id], ['score' => $data['scores'][$skill->id]]);
         }
+
+        Audit::record('softskill.rated', 'Menilai soft skill '.$student->name);
 
         return back()->with('success', 'Penilaian soft skill disimpan.');
     }

@@ -13,7 +13,7 @@ class QuizController extends Controller
 {
     private function own(Quiz $quiz): Quiz
     {
-        abort_unless($quiz->teacher_id === auth()->id(), 403);
+        abort_unless((int) $quiz->teacher_id === (int) auth()->id(), 403);
 
         return $quiz;
     }

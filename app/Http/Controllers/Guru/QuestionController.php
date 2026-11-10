@@ -13,7 +13,7 @@ class QuestionController extends Controller
 {
     private function check(Quiz $quiz, ?Question $question = null): void
     {
-        abort_unless($quiz->teacher_id === auth()->id(), 403);
+        abort_unless((int) $quiz->teacher_id === (int) auth()->id(), 403);
         abort_if($question && $question->quiz_id !== $quiz->id, 404);
     }
 

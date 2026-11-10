@@ -25,6 +25,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->error('DatabaseSeeder membuat akun contoh berkata sandi "password" dan DIBLOKIR di produksi. Pakai seeder spesifik: MajorSeeder, VocationalSubjectSeeder, GamificationSeeder, SkillSeeder.');
+
+            return;
+        }
+
         $this->call(MajorSeeder::class);
         $rpl = Major::where('code', 'RPL')->firstOrFail();
 

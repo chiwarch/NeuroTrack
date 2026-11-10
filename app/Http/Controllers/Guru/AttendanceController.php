@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceSession;
 use App\Models\SchoolClass;
 use App\Services\AttendanceToken;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
@@ -112,6 +113,8 @@ class AttendanceController extends Controller
             );
         }
 
+        Audit::record('attendance.manual', 'Mengubah status absensi kelas '.$session->schoolClass->name.' '.$session->attendance_date->toDateString());
+
         return back()->with('success', 'Absensi disimpan.');
     }
 
@@ -130,6 +133,8 @@ class AttendanceController extends Controller
             ]);
         }
         $session->update(['closed_at' => now()]);
+
+        Audit::record('attendance.closed', 'Menutup absensi kelas '.$session->schoolClass->name.' '.$session->attendance_date->toDateString());
 
         return back()->with('success', 'Absensi ditutup. Siswa yang belum tercatat ditandai Alfa.');
     }

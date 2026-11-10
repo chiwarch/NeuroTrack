@@ -7,6 +7,7 @@ use App\Models\ClassSubject;
 use App\Models\User;
 use App\Models\UserBadge;
 use App\Services\Gamification;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -57,6 +58,7 @@ class AwardController extends Controller
             return back()->with('error', $student->name.' sudah memiliki lencana '.$badge->name.'.');
         }
         Gamification::refresh($student->id);
+        Audit::record('award.granted', 'Lencana '.$badge->name.' untuk '.$student->name);
 
         return back()->with('success', $student->name.' mendapat lencana '.$badge->name.($badge->xp_reward ? ' (+'.$badge->xp_reward.' XP)' : '').'.');
     }
@@ -64,6 +66,7 @@ class AwardController extends Controller
     public function destroy(UserBadge $userBadge)
     {
         abort_unless($this->isAdmin() || (int) $userBadge->awarded_by === (int) auth()->id(), 403);
+        Audit::record('award.revoked', 'Mencabut lencana milik siswa #'.$userBadge->user_id);
         Gamification::revoke($userBadge);
 
         return back()->with('success', 'Penghargaan dicabut.');

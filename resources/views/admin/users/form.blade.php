@@ -105,4 +105,19 @@
 
         <button type="submit" class="t-btn t-btn-primary">Simpan</button>
     </form>
+
+    @if ($user->exists && $user->id !== auth()->id())
+        <section class="t-card mt-6 max-w-2xl space-y-3">
+            <h2 class="text-lg font-extrabold">Reset kata sandi</h2>
+            <p class="text-sm text-mute">Untuk pengguna yang lupa kata sandi. Sistem membuat kata sandi sementara acak yang tampil sekali di sini; pengguna wajib menggantinya saat masuk.</p>
+            @if (session('temp_password'))
+                <div class="rounded-xl bg-amber-50 p-4">
+                    <p class="text-xs font-bold uppercase tracking-wide text-amber-700">Kata sandi sementara (catat dan berikan langsung ke pengguna)</p>
+                    <p class="mt-1 select-all font-mono text-2xl font-extrabold tracking-wider">{{ session('temp_password') }}</p>
+                    <p class="mt-1 text-xs text-amber-700">Tidak akan ditampilkan lagi setelah halaman ini ditutup.</p>
+                </div>
+            @endif
+            <form method="POST" action="{{ route('admin.users.reset-password', $user) }}" onsubmit="return confirm('Buat kata sandi sementara baru untuk {{ addslashes($user->name) }}?')">@csrf<button class="t-btn t-btn-line">Buat kata sandi sementara</button></form>
+        </section>
+    @endif
 @endsection

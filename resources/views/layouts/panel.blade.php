@@ -22,6 +22,7 @@
             ['admin.awards.index', 'award', 'Penghargaan', ['admin.awards.*']],
             ['admin.badges.index', 'star', 'Lencana', ['admin.badges.*']],
             ['admin.leaderboard', 'bar-chart', 'Peringkat', ['admin.leaderboard']],
+            ['admin.audit.index', 'clock', 'Log Aktivitas', ['admin.audit.*']],
         ],
         'guru' => [
             ['guru.dashboard', 'home', 'Beranda', ['guru.dashboard']],
@@ -69,11 +70,13 @@
         </nav>
 
         <div class="mt-4 flex items-center gap-3 rounded-2xl bg-slate-50 p-3">
-            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-extrabold text-brand-600">{{ $u->initials() }}</span>
-            <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-bold">{{ $u->name }}</p>
-                <p class="text-xs text-mute">{{ \App\Models\User::ROLES[$u->role] }}</p>
-            </div>
+            <a href="{{ route('profile.edit') }}" class="flex min-w-0 flex-1 items-center gap-3" title="Profil dan ganti kata sandi">
+                <span class="grid size-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-extrabold text-brand-600">{{ $u->initials() }}</span>
+                <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-bold">{{ $u->name }}</span>
+                    <span class="block text-xs text-mute">{{ \App\Models\User::ROLES[$u->role] }}</span>
+                </span>
+            </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" class="cursor-pointer rounded-lg p-2 text-mute hover:bg-white hover:text-rose-600" title="Keluar" aria-label="Keluar"><x-icon name="logout" :size="18" /></button>
