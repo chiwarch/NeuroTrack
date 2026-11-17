@@ -5,7 +5,7 @@
     <a href="{{ route('orang_tua.dashboard') }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-mute hover:text-brand-600"><x-icon name="arrow-left" :size="16" /> Beranda</a>
     <div class="mb-6">
         <h1 class="t-page-title">{{ $student->name }}</h1>
-        <p class="mt-1 text-sm text-mute">{{ $student->nis }} · {{ $class ? 'Kelas '.$class->name : 'Belum punya kelas' }} · {{ $student->major?->code }}</p>
+        <p class="mt-1 text-sm text-mute">{{ $student->nis }} · <span data-testid="student-class">{{ $class ? 'Kelas '.$class->name : 'Belum punya kelas' }}</span> · {{ $student->major?->code }}</p>
     </div>
 
     {{-- Prestasi --}}
@@ -20,7 +20,7 @@
         <h2 class="mb-3 text-lg font-extrabold">Absensi</h2>
         <div class="grid gap-4 lg:grid-cols-3">
             <div class="t-card flex items-center gap-5">
-                <div class="ring" style="--p: {{ $all['rate'] }}"><span>{{ $all['rate'] + 0 }}%</span></div>
+                <div class="ring" style="--p: {{ $all['rate'] }}"><span data-testid="rate-value">{{ number_format($all['rate'], 1, ',', '.') }}%</span></div>
                 <div>
                     <p class="font-extrabold">Rate Kehadiran</p>
                     <p class="mt-1 text-sm text-mute">Bulan ini {{ $month['rate'] + 0 }}% dari {{ $month['days'] }} hari.</p>
@@ -29,7 +29,7 @@
             <div class="grid grid-cols-3 gap-4 sm:grid-cols-6 lg:col-span-2">
                 @foreach ([['present', 'Hadir'], ['late', 'Terlambat'], ['sick', 'Sakit'], ['permission', 'Izin'], ['absent', 'Alfa'], ['dispensation', 'Dispensasi']] as [$key, $label])
                     <div class="t-card p-4">
-                        <p class="text-2xl font-extrabold leading-none">{{ $all[$key] }}</p>
+                        <p class="text-2xl font-extrabold leading-none" @if($key === 'late') data-testid="late-count" @endif>{{ $all[$key] }}</p>
                         <p class="mt-2 text-xs font-semibold text-mute">{{ $label }}</p>
                     </div>
                 @endforeach

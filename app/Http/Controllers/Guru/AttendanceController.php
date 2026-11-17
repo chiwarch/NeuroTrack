@@ -83,6 +83,8 @@ class AttendanceController extends Controller
                 'label' => $a->label(),
                 'tone' => $a->tone(),
                 'time' => $a->check_in_at?->format('H:i'),
+                'iso' => $a->check_in_at?->toIso8601String(),
+                'method' => $a->method,
             ])->values(),
         ]);
     }

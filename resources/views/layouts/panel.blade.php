@@ -92,7 +92,7 @@
 
         <main class="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
             @if (session('success'))
-                <div class="mb-5 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"><x-icon name="check-circle" :size="18" /> {{ session('success') }}</div>
+                <div data-testid="soft-saved" class="mb-5 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700"><x-icon name="check-circle" :size="18" /> {{ session('success') }}</div>
             @endif
             @if (session('error'))
                 <div class="mb-5 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{{ session('error') }}</div>

@@ -9,7 +9,7 @@
 
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="t-card flex items-center gap-5">
-            <div class="ring" style="--p: {{ $all['rate'] }}"><span>{{ $all['rate'] + 0 }}%</span></div>
+            <div class="ring" style="--p: {{ $all['rate'] }}"><span data-testid="rate-value">{{ number_format($all['rate'], 1, ',', '.') }}%</span></div>
             <div>
                 <p class="font-extrabold">Rate Kehadiran</p>
                 <p class="mt-1 text-sm text-mute">Bulan ini {{ $month['rate'] + 0 }}% dari {{ $month['days'] }} hari.</p>
@@ -18,13 +18,13 @@
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:col-span-2">
             @foreach ([['present', 'Hadir'], ['late', 'Terlambat'], ['sick', 'Sakit'], ['permission', 'Izin'], ['absent', 'Alfa'], ['dispensation', 'Dispensasi']] as [$key, $label])
                 <div class="t-card p-4">
-                    <p class="text-2xl font-extrabold leading-none">{{ $all[$key] }}</p>
+                    <p class="text-2xl font-extrabold leading-none" @if($key === 'late') data-testid="late-count" @endif>{{ $all[$key] }}</p>
                     <p class="mt-2 text-xs font-semibold text-mute">{{ $label }}</p>
                 </div>
             @endforeach
         </div>
     </div>
-    <p class="t-hint mt-2">Rate dihitung dari hadir + terlambat dibanding semua hari tercatat. Dispensasi tidak dihitung.</p>
+    <p class="t-hint mt-2" data-testid="rate-formula">Rate dihitung dari hadir + terlambat dibanding semua hari tercatat. Dispensasi tidak dihitung.</p>
 
     <section class="mt-8">
         <h2 class="mb-3 text-lg font-extrabold">Riwayat</h2>

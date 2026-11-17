@@ -98,7 +98,15 @@ if (qrBox && qrBox.dataset.liveUrl) {
             const badge = row.querySelector('[data-badge]');
             badge.className = 't-badge ' + r.tone;
             badge.textContent = r.label;
-            row.querySelector('[data-time]').textContent = r.time || '–';
+            const timeEl = row.querySelector('[data-time]');
+            if (timeEl) {
+                timeEl.textContent = r.time || '–';
+                if (r.iso) timeEl.setAttribute('data-iso', r.iso);
+            }
+            const scanEl = row.querySelector('[data-testid="row-scanned-at"]');
+            if (scanEl && r.iso) scanEl.setAttribute('data-iso', r.iso);
+            const sourceEl = row.querySelector('[data-testid="row-source"]');
+            if (sourceEl && r.method) sourceEl.textContent = r.method;
             const sel = row.querySelector('[data-select]');
             if (sel && sel.dataset.dirty !== '1') sel.value = r.status;
         });
@@ -106,6 +114,9 @@ if (qrBox && qrBox.dataset.liveUrl) {
     };
 
     const drawQr = async (url) => {
+        if (canvas) canvas.setAttribute('data-url', url);
+        const qrPayload = document.querySelector('[data-testid="qr-payload"]');
+        if (qrPayload) qrPayload.setAttribute('data-url', url);
         QR = QR || (await import('qrcode')).default;
         await QR.toCanvas(canvas, url, { width: 256, margin: 1 });
     };

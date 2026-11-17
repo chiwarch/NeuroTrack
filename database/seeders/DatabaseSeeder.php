@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Announcement;
-use App\Models\Badge;
-use App\Models\XpTransaction;
-use App\Services\Gamification;
 use App\Models\Assignment;
+use App\Models\Badge;
 use App\Models\ClassSubject;
 use App\Models\Major;
 use App\Models\Quiz;
@@ -15,6 +13,8 @@ use App\Models\Skill;
 use App\Models\SkillAssessment;
 use App\Models\Subject;
 use App\Models\User;
+use App\Models\XpTransaction;
+use App\Services\Gamification;
 use Illuminate\Database\Seeder;
 
 /**
@@ -72,9 +72,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         foreach ([
-            [$admin, 'Selamat datang di NeuroTrack', "Mulai semester ini kita belajar dan absen lewat NeuroTrack. Masuk dengan akun dari sekolah ya.", 'all', null],
-            [$admin, 'Pertemuan Orang Tua dan Wali Kelas', "Pertemuan orang tua dan wali kelas dilaksanakan Sabtu pekan depan pukul 09.00 di aula sekolah.", 'parents', null],
-            [$guru, 'Ulangan Harian Matematika', "Ulangan harian Persamaan Linear hari Jumat. Kerjakan juga kuis latihannya di menu Kuis.", 'class', $kelas],
+            [$admin, 'Selamat datang di NeuroTrack', 'Mulai semester ini kita belajar dan absen lewat NeuroTrack. Masuk dengan akun dari sekolah ya.', 'all', null],
+            [$admin, 'Pertemuan Orang Tua dan Wali Kelas', 'Pertemuan orang tua dan wali kelas dilaksanakan Sabtu pekan depan pukul 09.00 di aula sekolah.', 'parents', null],
+            [$guru, 'Ulangan Harian Matematika', 'Ulangan harian Persamaan Linear hari Jumat. Kerjakan juga kuis latihannya di menu Kuis.', 'class', $kelas],
         ] as [$pembuat, $judul, $isi, $sasaran, $untukKelas]) {
             $pengumuman = new Announcement(['title' => $judul, 'content' => $isi, 'target_type' => $sasaran, 'published_at' => now()]);
             $pengumuman->created_by = $pembuat->id;

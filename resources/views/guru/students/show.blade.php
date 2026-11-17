@@ -5,7 +5,7 @@
     <a href="{{ route('guru.students.index') }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-mute hover:text-brand-600"><x-icon name="arrow-left" :size="16" /> Penilaian Siswa</a>
     <div class="mb-6">
         <h1 class="t-page-title">{{ $student->name }}</h1>
-        <p class="mt-1 text-sm text-mute">{{ $student->nis }} · {{ $student->classes->first()?->name ?? 'Belum punya kelas' }} · {{ $student->major?->code }}</p>
+        <p class="mt-1 text-sm text-mute">{{ $student->nis }} · <span data-testid="student-class">{{ $student->classes->first()?->name ?? 'Belum punya kelas' }}</span> · {{ $student->major?->code }}</p>
     </div>
 
     @include('partials.stats')
@@ -43,6 +43,6 @@
             <label for="notes" class="t-label">Catatan (opsional)</label>
             <textarea id="notes" name="notes" rows="3" class="t-input" maxlength="1000">{{ old('notes', $notes) }}</textarea>
         </div>
-        <button class="t-btn t-btn-primary">Simpan penilaian</button>
+        <button data-testid="soft-save" class="t-btn t-btn-primary">Simpan penilaian</button>
     </form>
 @endsection

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Gamification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -38,7 +39,7 @@ class Attendance extends Model
     protected static function booted(): void
     {
         // XP & lencana mengikuti absensi; gagal di sini tidak boleh menggagalkan absensi.
-        static::saved(fn (Attendance $a) => \App\Services\Gamification::safely(fn () => \App\Services\Gamification::syncAttendance($a), 'absensi #'.$a->id));
+        static::saved(fn (Attendance $a) => Gamification::safely(fn () => Gamification::syncAttendance($a), 'absensi #'.$a->id));
     }
 
     public function student(): BelongsTo

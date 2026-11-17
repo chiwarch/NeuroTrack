@@ -62,7 +62,7 @@ class AttendanceController extends Controller
         Attendance::updateOrCreate(
             ['student_id' => $user->id, 'class_id' => $session->class_id, 'attendance_date' => $session->attendance_date->toDateString()],
             ['status' => $status, 'recorded_by' => $session->teacher_id, 'attendance_session_id' => $session->id,
-             'check_in_at' => now(), 'method' => 'qr'],
+                'check_in_at' => now(), 'method' => 'qr'],
         );
         session()->forget('att_proof');
 

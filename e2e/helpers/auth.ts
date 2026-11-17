@@ -6,9 +6,9 @@ type Cred = { id: string; password: string };
 export async function login(page: Page, who: Cred) {
   await page.goto(ROUTES.login);
   await page.getByLabel(/email|nis|nip/i).fill(who.id);
-  await page.getByLabel(/password|kata sandi/i).fill(who.password);
+  await page.getByRole('textbox', { name: /password|kata sandi/i }).fill(who.password);
   await page.getByRole('button', { name: /masuk|login/i }).click();
-  await expect(page).not.toHaveURL(/\/login/);
+  await expect(page).not.toHaveURL(/\/login|\/masuk/);
 }
 
 /** Ganti akun di perangkat yang sama (localStorage/device_id tetap, cookie sesi dihapus). */

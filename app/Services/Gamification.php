@@ -10,6 +10,7 @@ use App\Models\SchoolClass;
 use App\Models\User;
 use App\Models\UserBadge;
 use App\Models\XpTransaction;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Schema;
 class Gamification
 {
     public const ATTENDANCE_XP = ['present' => 10, 'late' => 5];
+
     public const QUIZ_XP_RATE = 0.2;
 
     private static ?bool $ready = null;
@@ -51,7 +53,7 @@ class Gamification
         if (! self::ready()) {
             return;
         }
-        \Illuminate\Support\Facades\DB::afterCommit(function () use ($work, $context) {
+        DB::afterCommit(function () use ($work, $context) {
             try {
                 $work();
             } catch (\Throwable $e) {
@@ -223,6 +225,7 @@ class Gamification
 
         $rank = 0;
         $previous = null;
+
         return $rows->map(function ($row, $i) use ($levels, $badgeCounts, &$rank, &$previous) {
             if ($row->xp !== $previous) {
                 $rank = $i + 1; // XP sama = peringkat sama

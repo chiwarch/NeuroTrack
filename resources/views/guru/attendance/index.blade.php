@@ -12,17 +12,25 @@
     @else
         <div class="space-y-3">
             @foreach ($classes as $c)
-                @php $s = $sessions->get($c->id); @endphp
-                <div class="t-card flex flex-wrap items-center gap-4">
+                @php
+                    $s = $sessions->get($c->id);
+                    $slug = \Illuminate\Support\Str::slug($c->name);
+                @endphp
+                <div class="t-card flex flex-wrap items-center gap-4" @if($s) data-testid="sessions-today-{{ $slug }}" @endif>
                     <div class="min-w-0 flex-1">
                         <p class="font-extrabold">{{ $c->name }}</p>
                         <p class="text-xs text-mute">{{ $c->students_count }} siswa · {{ $c->academic_year }}</p>
                     </div>
                     @if ($s)
                         <span class="t-badge {{ $s->isOpen() ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600' }}">{{ $s->isOpen() ? 'Sesi terbuka' : 'Sesi ditutup' }}</span>
-                        <a href="{{ route('guru.attendance.show', $s) }}" class="t-btn t-btn-primary">Buka <x-icon name="arrow-right" :size="16" /></a>
+                        <a href="{{ route('guru.attendance.show', $s) }}" data-testid="start-attendance-{{ $slug }}" class="t-btn t-btn-primary">
+                            {{ $s->isOpen() ? 'Buka' : 'Buka kembali' }} <x-icon name="arrow-right" :size="16" />
+                        </a>
                     @else
-                        <form method="POST" action="{{ route('guru.attendance.open', $c) }}">@csrf<button class="t-btn t-btn-primary">Mulai absensi hari ini</button></form>
+                        <form method="POST" action="{{ route('guru.attendance.open', $c) }}">
+                            @csrf
+                            <button data-testid="start-attendance-{{ $slug }}" class="t-btn t-btn-primary">Mulai absensi hari ini</button>
+                        </form>
                     @endif
                 </div>
             @endforeach

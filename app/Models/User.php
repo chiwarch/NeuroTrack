@@ -23,10 +23,25 @@ class User extends Authenticatable
         return ['password' => 'hashed', 'email_verified_at' => 'datetime', 'must_change_password' => 'boolean', 'password_changed_at' => 'datetime'];
     }
 
-    public function isAdmin(): bool { return $this->role === 'admin'; }
-    public function isGuru(): bool { return $this->role === 'guru'; }
-    public function isSiswa(): bool { return $this->role === 'siswa'; }
-    public function isOrangTua(): bool { return $this->role === 'orang_tua'; }
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isGuru(): bool
+    {
+        return $this->role === 'guru';
+    }
+
+    public function isSiswa(): bool
+    {
+        return $this->role === 'siswa';
+    }
+
+    public function isOrangTua(): bool
+    {
+        return $this->role === 'orang_tua';
+    }
 
     public function major(): BelongsTo
     {

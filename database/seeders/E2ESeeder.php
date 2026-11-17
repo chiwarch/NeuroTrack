@@ -9,6 +9,7 @@ use App\Models\Major;
 use App\Models\SchoolClass;
 use App\Models\Skill;
 use App\Models\SkillAssessment;
+use App\Models\SkillAssessmentScore;
 use App\Models\Subject;
 use App\Models\User;
 use Carbon\Carbon;
@@ -29,11 +30,12 @@ class E2ESeeder extends Seeder
     {
         if (app()->environment('production')) {
             $this->command?->error('E2ESeeder DITOLAK di production.');
+
             return;
         }
 
         $password = env('E2E_PASSWORD', 'Password123!');
-        $qrStep   = (int) env('QR_INTERVAL_SECONDS', 20);
+        $qrStep = (int) env('QR_INTERVAL_SECONDS', 20);
 
         // Pastikan config attendance.qr_step mengikuti env saat ini
         // (di lingkungan e2e, QR_INTERVAL_SECONDS sudah masuk .env.e2e)
@@ -55,9 +57,9 @@ class E2ESeeder extends Seeder
         // Mata pelajaran
         // ----------------------------------------------------------------
         // Umum (untuk semua jurusan → radar X RPL)
-        $sejarah    = Subject::firstOrCreate(['name' => 'Sejarah'], ['type' => 'umum', 'icon' => 'mapel-sejarah']);
-        $mtk        = Subject::firstOrCreate(['name' => 'Matematika E2E'], ['type' => 'umum', 'icon' => 'mapel-mtk']);
-        $bing       = Subject::firstOrCreate(['name' => 'Bahasa Inggris E2E'], ['type' => 'umum', 'icon' => 'mapel-english']);
+        $sejarah = Subject::firstOrCreate(['name' => 'Sejarah'], ['type' => 'umum', 'icon' => 'mapel-sejarah']);
+        $mtk = Subject::firstOrCreate(['name' => 'Matematika E2E'], ['type' => 'umum', 'icon' => 'mapel-mtk']);
+        $bing = Subject::firstOrCreate(['name' => 'Bahasa Inggris E2E'], ['type' => 'umum', 'icon' => 'mapel-english']);
 
         // Kejuruan RPL
         $dpkRpl = Subject::firstOrCreate(
@@ -80,37 +82,36 @@ class E2ESeeder extends Seeder
         // ----------------------------------------------------------------
         // Skill (soft skill) — gunakan SkillSeeder supaya konsisten
         // ----------------------------------------------------------------
-        (new SkillSeeder())->run();
+        (new SkillSeeder)->run();
         $softSkills = Skill::softSkills();
 
         // ----------------------------------------------------------------
         // Akun staf
         // ----------------------------------------------------------------
-        $makeStaff = fn (string $name, string $email, string $role, ?Major $major = null) =>
-            User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'name'     => $name,
-                    'password' => Hash::make($password),
-                    'role'     => $role,
-                    'major_id' => $major?->id,
-                    'must_change_password' => false,
-                    'password_changed_at'  => now(),
-                ]
-            );
+        $makeStaff = fn (string $name, string $email, string $role, ?Major $major = null) => User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => Hash::make($password),
+                'role' => $role,
+                'major_id' => $major?->id,
+                'must_change_password' => false,
+                'password_changed_at' => now(),
+            ]
+        );
 
-        $admin   = $makeStaff('Admin E2E', 'admin@neurotrack.test', 'admin');
-        $kepsek  = $makeStaff('Kepsek E2E', 'kepsek@neurotrack.test', 'admin'); // kepsek pakai role admin/guru
+        $admin = $makeStaff('Admin E2E', 'admin@neurotrack.test', 'admin');
+        $kepsek = $makeStaff('Kepsek E2E', 'kepsek@neurotrack.test', 'admin'); // kepsek pakai role admin/guru
         $guruRpl = $makeStaff('Guru RPL E2E', 'guru.rpl@neurotrack.test', 'guru');
         $guruTkj = $makeStaff('Guru TKJ E2E', 'guru.tkj@neurotrack.test', 'guru');
-        $wali    = $makeStaff('Wali X RPL 1 E2E', 'wali.xrpl1@neurotrack.test', 'guru');
+        $wali = $makeStaff('Wali X RPL 1 E2E', 'wali.xrpl1@neurotrack.test', 'guru');
 
         // Pastikan password diperbarui jika seeder dijalankan ulang
         foreach ([$admin, $kepsek, $guruRpl, $guruTkj, $wali] as $u) {
             $u->update([
                 'password' => Hash::make($password),
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]);
         }
 
@@ -139,26 +140,26 @@ class E2ESeeder extends Seeder
         // ----------------------------------------------------------------
         $xRpl1Students = [];
         for ($n = 1; $n <= 35; $n++) {
-            $nis  = '202600'.(str_pad((string) $n, 2, '0', STR_PAD_LEFT));
-            $nis  = '2026'.str_pad((string) $n, 3, '0', STR_PAD_LEFT);
+            $nis = '202600'.(str_pad((string) $n, 2, '0', STR_PAD_LEFT));
+            $nis = '2026'.str_pad((string) $n, 3, '0', STR_PAD_LEFT);
             $email = "siswa.{$nis}@neurotrack.test";
             $s = User::firstOrCreate(
                 ['nis' => $nis],
                 [
-                    'name'     => "Siswa E2E {$nis}",
-                    'email'    => $email,
+                    'name' => "Siswa E2E {$nis}",
+                    'email' => $email,
                     'password' => Hash::make($password),
-                    'role'     => 'siswa',
+                    'role' => 'siswa',
                     'major_id' => $rpl->id,
                     'grade_level' => 10,
                     'must_change_password' => false,
-                    'password_changed_at'  => now(),
+                    'password_changed_at' => now(),
                 ]
             );
             $s->update([
                 'password' => Hash::make($password),
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]);
             $xRpl1Students[$nis] = $s;
         }
@@ -168,11 +169,11 @@ class E2ESeeder extends Seeder
         $ortu = User::firstOrCreate(
             ['email' => 'ortu.2026001@neurotrack.test'],
             [
-                'name'     => 'Ortu Siswa 2026001',
+                'name' => 'Ortu Siswa 2026001',
                 'password' => Hash::make($password),
-                'role'     => 'orang_tua',
+                'role' => 'orang_tua',
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $ortu->update(['password' => Hash::make($password)]);
@@ -195,14 +196,14 @@ class E2ESeeder extends Seeder
         $siswa2026101 = User::firstOrCreate(
             ['nis' => '2026101'],
             [
-                'name'     => 'Siswa TKJ 2026101',
-                'email'    => 'siswa.2026101@neurotrack.test',
+                'name' => 'Siswa TKJ 2026101',
+                'email' => 'siswa.2026101@neurotrack.test',
                 'password' => Hash::make($password),
-                'role'     => 'siswa',
+                'role' => 'siswa',
                 'major_id' => $tkj->id,
                 'grade_level' => 10,
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $siswa2026101->update(['password' => Hash::make($password)]);
@@ -224,14 +225,14 @@ class E2ESeeder extends Seeder
         $siswa2025001 = User::firstOrCreate(
             ['nis' => '2025001'],
             [
-                'name'     => 'Siswa XI RPL 2025001',
-                'email'    => 'siswa.2025001@neurotrack.test',
+                'name' => 'Siswa XI RPL 2025001',
+                'email' => 'siswa.2025001@neurotrack.test',
                 'password' => Hash::make($password),
-                'role'     => 'siswa',
+                'role' => 'siswa',
                 'major_id' => $rpl->id,
                 'grade_level' => 11,
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $siswa2025001->update(['password' => Hash::make($password)]);
@@ -240,14 +241,14 @@ class E2ESeeder extends Seeder
         $siswa2025950 = User::firstOrCreate(
             ['nis' => '2025950'],
             [
-                'name'     => 'Siswa XI Promotable 2025950',
-                'email'    => 'siswa.2025950@neurotrack.test',
+                'name' => 'Siswa XI Promotable 2025950',
+                'email' => 'siswa.2025950@neurotrack.test',
                 'password' => Hash::make($password),
-                'role'     => 'siswa',
+                'role' => 'siswa',
                 'major_id' => $rpl->id,
                 'grade_level' => 11,
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $siswa2025950->update(['password' => Hash::make($password)]);
@@ -337,14 +338,14 @@ class E2ESeeder extends Seeder
         $siswa2026910 = User::firstOrCreate(
             ['nis' => '2026910'],
             [
-                'name'     => 'Siswa Few Axes 2026910',
-                'email'    => 'siswa.2026910@neurotrack.test',
+                'name' => 'Siswa Few Axes 2026910',
+                'email' => 'siswa.2026910@neurotrack.test',
                 'password' => Hash::make($password),
-                'role'     => 'siswa',
+                'role' => 'siswa',
                 'major_id' => $fewMajor->id,
                 'grade_level' => 10,
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $siswa2026910->update(['password' => Hash::make($password)]);
@@ -371,16 +372,16 @@ class E2ESeeder extends Seeder
 
         // Soft skill terbuka untuk wali dan guru mapel
         // Buat satu penilaian soft skill dari semester lalu untuk poligon pembanding (NIS 2026001)
-        $lastSemesterEnd   = Carbon::now()->subMonths(6)->endOfMonth()->toDateString();
+        $lastSemesterEnd = Carbon::now()->subMonths(6)->endOfMonth()->toDateString();
         $lastSemesterStart = Carbon::now()->subMonths(6)->startOfMonth()->toDateString();
 
         $prevAssessment = SkillAssessment::firstOrCreate(
             [
-                'student_id'   => $siswa2026001->id,
-                'assessed_by'  => $guruRpl->id,
-                'source_type'  => 'teacher',
+                'student_id' => $siswa2026001->id,
+                'assessed_by' => $guruRpl->id,
+                'source_type' => 'teacher',
                 'period_start' => $lastSemesterStart,
-                'period_end'   => $lastSemesterEnd,
+                'period_end' => $lastSemesterEnd,
             ],
             ['assessed_at' => Carbon::now()->subMonths(6)]
         );
@@ -401,7 +402,7 @@ class E2ESeeder extends Seeder
             ['class_id' => $xRpl1->id, 'attendance_date' => $yesterday->toDateString()],
             [
                 'teacher_id' => $guruRpl->id,
-                'opened_at'  => $yesterday->copy()->setTime(7, 0),
+                'opened_at' => $yesterday->copy()->setTime(7, 0),
                 // closed_at NULL = belum difinalisasi
             ]
         );
@@ -410,11 +411,11 @@ class E2ESeeder extends Seeder
         Attendance::firstOrCreate(
             ['student_id' => $firstStudent->id, 'class_id' => $xRpl1->id, 'attendance_date' => $yesterday->toDateString()],
             [
-                'recorded_by'           => $guruRpl->id,
+                'recorded_by' => $guruRpl->id,
                 'attendance_session_id' => $unfinalSession->id,
-                'status'                => 'present',
-                'check_in_at'           => $yesterday->copy()->setTime(7, 5),
-                'method'                => 'qr',
+                'status' => 'present',
+                'check_in_at' => $yesterday->copy()->setTime(7, 5),
+                'method' => 'qr',
             ]
         );
 
@@ -430,21 +431,22 @@ class E2ESeeder extends Seeder
         $s = User::firstOrCreate(
             ['nis' => $nis],
             [
-                'name'     => "Siswa Rate {$nis}",
-                'email'    => "siswa.{$nis}@neurotrack.test",
+                'name' => "Siswa Rate {$nis}",
+                'email' => "siswa.{$nis}@neurotrack.test",
                 'password' => Hash::make($password),
-                'role'     => 'siswa',
+                'role' => 'siswa',
                 'major_id' => $major->id,
                 'grade_level' => $gradeLevel,
                 'must_change_password' => false,
-                'password_changed_at'  => now(),
+                'password_changed_at' => now(),
             ]
         );
         $s->update([
             'password' => Hash::make($password),
             'must_change_password' => false,
-            'password_changed_at'  => now(),
+            'password_changed_at' => now(),
         ]);
+
         return $s;
     }
 
@@ -475,12 +477,13 @@ class E2ESeeder extends Seeder
 
         // Mulai dari 70 hari yang lalu, lewati akhir pekan
         $date = Carbon::now()->subDays(70);
-        $idx  = 0;
+        $idx = 0;
 
         while ($idx < count($statuses)) {
             // Lewati akhir pekan
             if ($date->isWeekend()) {
                 $date->addDay();
+
                 continue;
             }
 
@@ -491,18 +494,18 @@ class E2ESeeder extends Seeder
                 ['class_id' => $class->id, 'attendance_date' => $dateStr],
                 [
                     'teacher_id' => $teacher->id,
-                    'opened_at'  => $date->copy()->setTime(7, 0),
-                    'closed_at'  => $isFinalized ? $date->copy()->setTime(14, 0) : null,
+                    'opened_at' => $date->copy()->setTime(7, 0),
+                    'closed_at' => $isFinalized ? $date->copy()->setTime(14, 0) : null,
                 ]
             );
 
             Attendance::firstOrCreate(
                 ['student_id' => $student->id, 'class_id' => $class->id, 'attendance_date' => $dateStr],
                 [
-                    'recorded_by'           => $teacher->id,
+                    'recorded_by' => $teacher->id,
                     'attendance_session_id' => $session->id,
-                    'status'                => $status,
-                    'check_in_at'           => in_array($status, ['present', 'late'])
+                    'status' => $status,
+                    'check_in_at' => in_array($status, ['present', 'late'])
                         ? $date->copy()->setTime(7, rand(0, 30))
                         : null,
                     'method' => in_array($status, ['present', 'late']) ? 'qr' : 'manual',
@@ -535,7 +538,7 @@ class E2ESeeder extends Seeder
         })->pluck('id')->all();
 
         $staffIds = User::whereIn('email', $e2eEmails)->pluck('id')->all();
-        $allIds   = array_merge($staffIds, $studentIds);
+        $allIds = array_merge($staffIds, $studentIds);
 
         if (empty($allIds)) {
             return;
@@ -548,8 +551,8 @@ class E2ESeeder extends Seeder
         // Hapus attendance sessions
         $classIds = SchoolClass::where(function ($q) use ($staffIds) {
             $q->whereIn('homeroom_teacher_id', $staffIds)
-              ->orWhere('name', 'like', '%E2E%')
-              ->orWhereIn('name', ['X RPL 1', 'X TKJ 1', 'XI RPL 1', 'Rate Case E2E', 'X AKL 1 E2E']);
+                ->orWhere('name', 'like', '%E2E%')
+                ->orWhereIn('name', ['X RPL 1', 'X TKJ 1', 'XI RPL 1', 'Rate Case E2E', 'X AKL 1 E2E']);
         })->pluck('id')->all();
 
         if ($classIds) {
@@ -557,7 +560,7 @@ class E2ESeeder extends Seeder
         }
 
         // Hapus skill assessments
-        \App\Models\SkillAssessmentScore::whereHas('assessment', fn ($q) => $q->whereIn('student_id', $studentIds))->delete();
+        SkillAssessmentScore::whereHas('assessment', fn ($q) => $q->whereIn('student_id', $studentIds))->delete();
         SkillAssessment::whereIn('student_id', $studentIds)->delete();
     }
 }

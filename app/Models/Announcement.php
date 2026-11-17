@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class Announcement extends Model
 {
@@ -64,7 +65,7 @@ class Announcement extends Model
                 $w->orWhere('target_type', 'parents');
                 $majorIds = $user->children()->pluck('users.major_id')->filter()->unique()->values()->all();
                 // Pengumuman kelas ikut terlihat bila salah satu anaknya ada di kelas itu.
-                $classIds = \Illuminate\Support\Facades\DB::table('class_memberships')->whereNull('left_at')
+                $classIds = DB::table('class_memberships')->whereNull('left_at')
                     ->whereIn('student_id', $user->children()->pluck('users.id'))->pluck('class_id')->unique()->all();
                 if ($classIds) {
                     $w->orWhere(fn (Builder $c) => $c->where('target_type', 'class')

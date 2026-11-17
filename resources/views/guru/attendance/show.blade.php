@@ -7,26 +7,48 @@
         <div>
             <h1 class="t-page-title">{{ $session->schoolClass->name }}</h1>
             <p class="mt-1 text-sm text-mute">{{ $session->attendance_date->translatedFormat('l, d F Y') }} · terlambat setelah {{ substr($session->late_after, 0, 5) }}</p>
+            <span data-testid="session-status" class="mt-1 inline-block text-xs font-bold {{ $session->isOpen() ? 'text-emerald-700' : 'text-slate-600' }}">{{ $session->isOpen() ? 'TERBUKA' : 'FINAL' }}</span>
         </div>
-        @if ($session->isOpen())
-            <form method="POST" action="{{ route('guru.attendance.close', $session) }}" onsubmit="return confirm('Tutup absensi? Siswa yang belum tercatat akan ditandai Alfa.')">@csrf<button class="t-btn t-btn-danger">Tutup absensi</button></form>
-        @elseif ($session->attendance_date->isToday())
-            <form method="POST" action="{{ route('guru.attendance.reopen', $session) }}">@csrf<button class="t-btn t-btn-line">Buka kembali</button></form>
-        @endif
+        <div class="flex items-center gap-2">
+            @if ($session->isOpen())
+                <form method="POST" action="{{ route('guru.attendance.close', $session) }}" onsubmit="return confirm('Tutup absensi? Siswa yang belum tercatat akan ditandai Alfa.')">
+                    @csrf
+                    <button data-testid="btn-close-session" class="t-btn t-btn-danger">Tutup absensi</button>
+                </form>
+            @elseif ($session->attendance_date->isToday())
+                <form method="POST" action="{{ route('guru.attendance.reopen', $session) }}">
+                    @csrf
+                    <button class="t-btn t-btn-line">Buka kembali</button>
+                </form>
+            @endif
+        </div>
     </div>
 
     <div class="grid gap-6 lg:grid-cols-3">
         @if ($session->isOpen())
             <div class="t-card flex flex-col items-center gap-3 text-center lg:sticky lg:top-6 lg:self-start"
                  id="qr-box" data-live-url="{{ route('guru.attendance.live', $session) }}">
-                <p class="font-extrabold">Pindai untuk absen</p>
-                <canvas id="qr-canvas" class="size-64 max-w-full rounded-xl" aria-label="Kode QR absensi"></canvas>
+                <div class="flex w-full items-center justify-between">
+                    <p class="font-extrabold">Pindai untuk absen</p>
+                    <a href="{{ route('guru.attendance.show', $session) }}" data-testid="link-pantauan" class="text-xs font-semibold text-brand-600 hover:underline">Pantauan</a>
+                </div>
+                <canvas id="qr-canvas"
+                        data-testid="qr-payload"
+                        data-url="{{ route('siswa.attendance.scan', ['t' => \App\Services\AttendanceToken::make($session)]) }}"
+                        class="size-64 max-w-full rounded-xl"
+                        aria-label="Kode QR absensi"></canvas>
                 <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100"><div id="qr-bar" class="h-full w-full origin-left bg-brand-500"></div></div>
                 <p class="text-xs text-mute">Kode berganti otomatis tiap {{ \App\Services\AttendanceToken::step() }} detik. Jangan difoto atau dibagikan.</p>
+                <p class="mt-2 text-sm text-mute" data-testid="present-count">
+                    <span id="count-in" class="font-extrabold text-ink">{{ $records->filter(fn ($r) => in_array($r->status, ['present', 'late']))->count() }}</span> / {{ $students->count() }}
+                </p>
             </div>
         @else
             <div class="t-card text-sm text-mute lg:self-start" id="qr-box" data-live-url="{{ route('guru.attendance.live', $session) }}">
                 Absensi {{ $session->attendance_date->isToday() ? 'sudah ditutup.' : 'tanggal ini sudah selesai.' }} Kamu masih bisa mengoreksi status di tabel.
+                <div class="mt-3">
+                    <a href="{{ route('guru.attendance.show', $session) }}" data-testid="link-pantauan" class="text-xs font-semibold text-brand-600 hover:underline">Pantauan</a>
+                </div>
             </div>
         @endif
 
@@ -38,10 +60,17 @@
                     <tbody class="divide-y divide-slate-100">
                         @forelse ($students as $s)
                             @php $r = $records->get($s->id); @endphp
-                            <tr data-student="{{ $s->id }}">
-                                <td class="t-td"><p class="font-bold">{{ $s->name }}</p><p class="text-xs text-mute">{{ $s->nis }}</p></td>
-                                <td class="t-td"><span data-badge class="t-badge {{ $r ? $r->tone() : 'bg-slate-100 text-slate-500' }}">{{ $r ? $r->label() : 'Belum' }}</span></td>
-                                <td class="t-td text-mute" data-time>{{ $r?->check_in_at?->format('H:i') ?? '–' }}</td>
+                            <tr data-student="{{ $s->id }}" data-testid="row-{{ $s->nis }}">
+                                <td class="t-td">
+                                    <p class="font-bold" data-testid="student-name">{{ $s->name }}</p>
+                                    <p class="text-xs text-mute">{{ $s->nis }}</p>
+                                </td>
+                                <td class="t-td">
+                                    <span data-badge data-testid="row-status" class="t-badge {{ $r ? $r->tone() : 'bg-slate-100 text-slate-500' }}">{{ $r ? $r->label() : 'Belum' }}</span>
+                                    <span data-testid="row-flag" class="hidden"></span>
+                                    <span data-testid="row-source" class="text-xs text-mute block">{{ $r?->method ?? '' }}</span>
+                                </td>
+                                <td class="t-td text-mute" data-time data-testid="row-scanned-at" data-iso="{{ $r?->check_in_at?->toIso8601String() ?? '' }}">{{ $r?->check_in_at?->format('H:i') ?? '–' }}</td>
                                 <td class="t-td">
                                     <select name="status[{{ $s->id }}]" data-select class="t-input !w-auto !py-1.5">
                                         <option value="">—</option>
@@ -59,7 +88,9 @@
             </div>
             @if ($students->isNotEmpty())
                 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-sm text-mute"><span id="count-in" class="font-extrabold text-ink">0</span> dari {{ $students->count() }} siswa sudah masuk</p>
+                    <p class="text-sm text-mute">
+                        <span class="font-extrabold text-ink">{{ $records->filter(fn ($r) => in_array($r->status, ['present', 'late']))->count() }}</span> dari {{ $students->count() }} siswa sudah masuk
+                    </p>
                     <button class="t-btn t-btn-primary">Simpan perubahan</button>
                 </div>
             @endif

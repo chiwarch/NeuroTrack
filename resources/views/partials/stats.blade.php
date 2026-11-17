@@ -1,12 +1,12 @@
 {{-- Dua radar + grafik batang. Butuh: $hard, $soft (lihat App\Services\SkillStats). --}}
 @php
     $panels = [
-        ['Hard Skill', 'Dari nilai kuis tiap mata pelajaran (0–100).', $hard, 100, '#6d3df0', 'bg-brand-500'],
-        ['Soft Skill', 'Penilaian guru, skala 1–5 (rata-rata semua guru).', $soft, \App\Services\SkillStats::SOFT_MAX, '#0ea5a4', 'bg-teal-500'],
+        ['Hard Skill', 'Dari nilai kuis tiap mata pelajaran (0–100).', $hard, 100, '#6d3df0', 'bg-brand-500', 'hard'],
+        ['Soft Skill', 'Penilaian guru, skala 1–5 (rata-rata semua guru).', $soft, \App\Services\SkillStats::SOFT_MAX, '#0ea5a4', 'bg-teal-500', 'soft'],
     ];
 @endphp
 <div class="grid gap-6 lg:grid-cols-2">
-    @foreach ($panels as [$title, $sub, $rows, $max, $hex, $bar])
+    @foreach ($panels as [$title, $sub, $rows, $max, $hex, $bar, $type])
         @php
             $withData = collect($rows)->whereNotNull('value');
             $top = $withData->count() >= 2 ? $withData->sortByDesc('value')->first() : null;
@@ -17,11 +17,15 @@
             <p class="text-xs text-mute">{{ $sub }}</p>
 
             @if (count($rows) >= 3)
-                <div class="mt-4"><x-radar :labels="array_column($rows, 'label')" :values="array_map(fn ($r) => $r['value'] ?? 0, $rows)" :max="$max" :color="$hex" /></div>
+                <div class="mt-4" @if($type === 'hard') data-testid="hard-radar-chart" @endif>
+                    <x-radar :labels="array_column($rows, 'label')" :values="array_map(fn ($r) => $r['value'] ?? 0, $rows)" :max="$max" :color="$hex" />
+                </div>
             @elseif (count($rows) === 0)
                 <p class="mt-4 text-sm text-mute">Belum ada data untuk ditampilkan.</p>
             @else
-                <p class="mt-4 text-xs text-mute">Radar tampil mulai dari 3 sumbu; lihat grafik batang di bawah.</p>
+                <div @if($type === 'hard') data-testid="hard-bar-chart" @endif>
+                    <p class="mt-4 text-xs text-mute">Radar tampil mulai dari 3 sumbu; lihat grafik batang di bawah.</p>
+                </div>
             @endif
 
             @if ($top && $low && $top['label'] !== $low['label'])
@@ -31,7 +35,9 @@
                 </div>
             @endif
 
-            <div class="mt-5 border-t border-slate-100 pt-5"><x-skill-bars :items="$rows" :max="$max" :color="$bar" /></div>
+            <div class="mt-5 border-t border-slate-100 pt-5">
+                <x-skill-bars :items="$rows" :max="$max" :color="$bar" :type="$type" />
+            </div>
         </section>
     @endforeach
 </div>

@@ -15,6 +15,7 @@ use Carbon\CarbonInterface;
 class AttendanceRate
 {
     public const ATTENDED = ['present', 'late'];
+
     public const COUNTED = ['present', 'late', 'sick', 'permission', 'absent'];
 
     public static function summary(User $student, ?CarbonInterface $from = null, ?CarbonInterface $to = null): array

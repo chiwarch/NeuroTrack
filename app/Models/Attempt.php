@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Gamification;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,7 +21,7 @@ class Attempt extends Model
     {
         static::saved(function (Attempt $a) {
             if ($a->status === 'selesai') {
-                \App\Services\Gamification::safely(fn () => \App\Services\Gamification::syncQuiz($a), 'kuis percobaan #'.$a->id);
+                Gamification::safely(fn () => Gamification::syncQuiz($a), 'kuis percobaan #'.$a->id);
             }
         });
     }

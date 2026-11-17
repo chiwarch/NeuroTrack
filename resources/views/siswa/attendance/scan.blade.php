@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="mx-auto max-w-md pt-6 text-center">
-        <div class="t-card space-y-4 p-8">
+        <div class="t-card space-y-4 p-8" data-testid="scan-result">
             @if ($state === 'ready')
                 <span class="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-100 text-brand-600"><x-icon name="check-circle" :size="28" /></span>
                 <h1 class="text-xl font-extrabold">Absen kelas {{ $session->schoolClass->name }}</h1>

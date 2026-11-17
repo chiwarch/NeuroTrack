@@ -26,8 +26,11 @@
         <polygon points="{{ $poly($R * $l / $rings) }}" fill="{{ $l % 2 ? '#f8fafc' : '#ffffff' }}" stroke="#e2e8f0" stroke-width="1"/>
     @endfor
     @for ($i = 0; $i < $n; $i++)
-        @php [$x, $y] = $pt($i, $R); @endphp
-        <line x1="{{ $cx }}" y1="{{ $cy }}" x2="{{ $x }}" y2="{{ $y }}" stroke="#e2e8f0" stroke-width="1"/>
+        @php
+            [$x, $y] = $pt($i, $R);
+            $key = isset($labels[$i]) ? \Illuminate\Support\Str::slug($labels[$i]) : "axis-{$i}";
+        @endphp
+        <line data-testid="radar-axis-{{ $key }}" x1="{{ $cx }}" y1="{{ $cy }}" x2="{{ $x }}" y2="{{ $y }}" stroke="#e2e8f0" stroke-width="1"/>
     @endfor
 
     <polygon points="{{ $shape }}" fill="url(#{{ $gid }})" stroke="{{ $color }}" stroke-width="2.5" stroke-linejoin="round"/>
@@ -42,8 +45,9 @@
             $anchor = $lx < $cx - 6 ? 'end' : ($lx > $cx + 6 ? 'start' : 'middle');
             $lines = explode("\n", wordwrap($label, 12, "\n", true));
             $dy = $ly > $cy + 6 ? 8 : ($ly < $cy - 6 ? -6 - 11 * (count($lines) - 1) : -4 * (count($lines) - 1));
+            $key = \Illuminate\Support\Str::slug($label);
         @endphp
-        <text x="{{ $lx }}" y="{{ $ly + $dy }}" text-anchor="{{ $anchor }}" font-size="11" font-weight="700" fill="#1b1550">
+        <text data-testid="radar-axis-label-{{ $key }}" x="{{ $lx }}" y="{{ $ly + $dy }}" text-anchor="{{ $anchor }}" font-size="11" font-weight="700" fill="#1b1550">
             @foreach ($lines as $k => $line)<tspan x="{{ $lx }}" dy="{{ $k === 0 ? 0 : 12 }}">{{ $line }}</tspan>@endforeach
         </text>
     @endforeach

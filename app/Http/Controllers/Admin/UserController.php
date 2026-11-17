@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassSubject;
 use App\Models\Major;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Support\Audit;
-use Illuminate\Support\Str;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
@@ -122,7 +122,7 @@ class UserController extends Controller
         if ($user->isGuru() && $user->quizzes()->exists()) {
             return back()->with('error', 'Guru ini masih punya kuis. Hapus atau pindahkan kuisnya dulu.');
         }
-        if ($user->isGuru() && \App\Models\ClassSubject::where('teacher_id', $user->id)->exists()) {
+        if ($user->isGuru() && ClassSubject::where('teacher_id', $user->id)->exists()) {
             return back()->with('error', 'Guru ini masih mengampu mapel di kelas. Ganti pengampunya di menu Kelas dulu.');
         }
         Audit::record('user.deleted', 'Menghapus '.$user->role.': '.$user->name);

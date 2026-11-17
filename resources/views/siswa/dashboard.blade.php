@@ -11,7 +11,7 @@
 
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="t-card flex items-center gap-5">
-            <div class="ring" style="--p: {{ $progress }}"><span>{{ $progress }}%</span></div>
+            <div class="ring shrink-0" style="--p: {{ $progress }}"><span>{{ $progress }}%</span></div>
             <div>
                 <p class="font-extrabold">Progres Keseluruhan</p>
                 <p class="mt-1 text-sm text-mute">{{ $completed }} dari {{ $available }} kuis sudah kamu selesaikan.</p>
