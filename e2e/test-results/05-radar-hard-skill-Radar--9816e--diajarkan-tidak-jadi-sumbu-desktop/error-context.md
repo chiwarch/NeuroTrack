@@ -14,7 +14,7 @@
 ```
 Error: expect(received).not.toEqual(expected) // deep equality
 
-Expected: not []
+Expected: not ["radar-axis-bahasa-inggris-e2e", "radar-axis-matematika-e2e", "radar-axis-sejarah", "radar-axis-dpk-rpl", "radar-axis-komunikasi", "radar-axis-kerja-sama", "radar-axis-kepemimpinan", "radar-axis-berpikir-pemecahan-masalah", "radar-axis-etos-kerja-tanggung-jawab", "radar-axis-adaptabilitas"]
 
 ```
 

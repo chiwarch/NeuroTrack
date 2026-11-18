@@ -54,6 +54,17 @@ Call log:
 - main:
   - heading "Halo, Siswa! 👋" [level=1]
   - paragraph: Ayo lanjutkan belajarmu hari ini.
+  - text: 100,0%
+  - paragraph: Rate Kehadiran
+  - paragraph: Rate dihitung dari hadir + terlambat dibanding semua hari tercatat. Dispensasi tidak dihitung.
+  - paragraph: "0"
+  - paragraph: Hadir
+  - paragraph: "0"
+  - paragraph: Terlambat
+  - paragraph: "0"
+  - paragraph: Sakit
+  - paragraph: "0"
+  - paragraph: Alfa
   - text: 0%
   - paragraph: Progres Keseluruhan
   - paragraph: 0 dari 0 kuis sudah kamu selesaikan.
@@ -69,6 +80,42 @@ Call log:
   - link "Lihat Semua":
     - /url: http://127.0.0.1:8000/siswa/kuis
   - text: Belum ada kuis untukmu. Tunggu guru menerbitkannya ya.
+  - heading "Hard Skill" [level=2]
+  - paragraph: Dari nilai kuis tiap mata pelajaran (0–100).
+  - img "Radar chart": BahasaInggris E2E MatematikaE2E Sejarah DPK-AKL
+  - paragraph: Bahasa Inggris E2E
+  - paragraph: belum dinilai
+  - paragraph: Belum ada kuis atau tugas
+  - paragraph: Matematika E2E
+  - paragraph: belum dinilai
+  - paragraph: Belum ada kuis atau tugas
+  - paragraph: Sejarah
+  - paragraph: belum dinilai
+  - paragraph: Belum ada kuis atau tugas
+  - paragraph: DPK-AKL
+  - paragraph: belum dinilai
+  - paragraph: Belum ada kuis atau tugas
+  - heading "Soft Skill" [level=2]
+  - paragraph: Penilaian guru, skala 1–5 (rata-rata semua guru).
+  - img "Radar chart": Komunikasi Kerja Sama Kepemimpinan Berpikir &PemecahanMasalah Etos Kerja &TanggungJawab Adaptabilitas
+  - paragraph: Komunikasi
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
+  - paragraph: Kerja Sama
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
+  - paragraph: Kepemimpinan
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
+  - paragraph: Berpikir & Pemecahan Masalah
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
+  - paragraph: Etos Kerja & Tanggung Jawab
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
+  - paragraph: Adaptabilitas
+  - paragraph: belum dinilai
+  - paragraph: Belum dinilai
 ```
 
 # Test source

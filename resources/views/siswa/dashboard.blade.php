@@ -9,6 +9,37 @@
 
     <div class="mb-4">@include('gamification._level-card')</div>
 
+    @php
+        $attSummary = \App\Services\AttendanceRate::summary(auth()->user());
+    @endphp
+    <div class="mb-4 grid gap-4 lg:grid-cols-3">
+        <div class="t-card flex items-center gap-5">
+            <div class="ring" style="--p: {{ $attSummary['rate'] }}"><span data-testid="rate-value">{{ number_format($attSummary['rate'], 1, ',', '.') }}%</span></div>
+            <div>
+                <p class="font-extrabold">Rate Kehadiran</p>
+                <p class="mt-1 text-xs text-mute" data-testid="rate-formula">Rate dihitung dari hadir + terlambat dibanding semua hari tercatat. Dispensasi tidak dihitung.</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:col-span-2">
+            <div class="t-card p-4">
+                <p class="text-2xl font-extrabold leading-none">{{ $attSummary['present'] }}</p>
+                <p class="mt-2 text-xs font-semibold text-mute">Hadir</p>
+            </div>
+            <div class="t-card p-4">
+                <p class="text-2xl font-extrabold leading-none" data-testid="late-count">{{ $attSummary['late'] }}</p>
+                <p class="mt-2 text-xs font-semibold text-mute">Terlambat</p>
+            </div>
+            <div class="t-card p-4">
+                <p class="text-2xl font-extrabold leading-none">{{ $attSummary['sick'] }}</p>
+                <p class="mt-2 text-xs font-semibold text-mute">Sakit</p>
+            </div>
+            <div class="t-card p-4">
+                <p class="text-2xl font-extrabold leading-none">{{ $attSummary['absent'] }}</p>
+                <p class="mt-2 text-xs font-semibold text-mute">Alfa</p>
+            </div>
+        </div>
+    </div>
+
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="t-card flex items-center gap-5">
             <div class="ring shrink-0" style="--p: {{ $progress }}"><span>{{ $progress }}%</span></div>
@@ -85,5 +116,14 @@
             </div>
         </section>
     @endif
+
+    @php
+        $hard = \App\Services\SkillStats::hardSkills(auth()->user());
+        $soft = \App\Services\SkillStats::softSkills(auth()->user());
+    @endphp
+    <section class="mt-8">
+        @include('partials.stats')
+    </section>
+
     @include('announcements._latest')
 @endsection
